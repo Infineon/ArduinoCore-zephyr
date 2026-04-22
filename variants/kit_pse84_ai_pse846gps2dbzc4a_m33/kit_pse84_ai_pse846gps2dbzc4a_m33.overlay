@@ -1,0 +1,166 @@
+/*
+ * Copyright (c) Arduino s.r.l. and/or its affiliated companies
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Devicetree overlay for KIT-PSE84-AI (PSoC Edge E84, CM33 secure)
+ *
+ * Hardware mapping derived from:
+ *   - Infineon TARGET_KIT_PSE84_AI BSP (design.modus)
+ *   - Zephyr board DTS (kit_pse84_ai_common.dtsi)
+ *   - Zephyr SoC DTS (pse84.bga-220.dtsi)
+ *
+ * Peripherals:
+ *   UART  : SCB2  - P6_7(TX) / P6_5(RX)  (console, enabled in board DTS)
+ *   I2C   : SCB0  - P8_0(SCL) / P8_1(SDA) (1.8V I2C bus)
+ *   SPI   : SCB3  - P21_6(CLK) / P21_5(MOSI) / P21_4(MISO) / P21_7(CS)
+ *   LEDs  : P10_7(LED0) P10_5(LED1) P20_6(RED) P20_4(GREEN) P20_5(BLUE)
+ *   Button: P7_0 (SW1, active-low, internal pull-up)
+ */
+
+/* ------------------------------------------------------------------ */
+/* Arduino user sketch partition                                      */
+/* Placed at the end of the CM33 secure XIP flash region.             */
+/* m33s_xip starts at 0x70100400 with size 0x1FFC00 (~2MB).          */
+/* Loader occupies the first portion; user_sketch gets the tail end.  */
+/*                                                                    */
+/* IMPORTANT: The Loader computes the sketch address as:              */
+/*   flash0_base (0x08000000) + partition_reg                         */
+/* So partition_reg must be relative to flash0 base.                  */
+/* Target XIP address 0x70200000 → offset = 0x70200000 - 0x08000000  */
+/*                                        = 0x68200000               */
+/* ------------------------------------------------------------------ */
+&flash0 {
+        partitions {
+                compatible = "fixed-partitions";
+                #address-cells = <1>;
+                #size-cells = <1>;
+
+                user_sketch: partition@68200000 {
+                        reg = <0x68200000 DT_SIZE_K(1023)>;
+                };
+        };
+};
+
+/* ------------------------------------------------------------------ */
+/* Enable GPIO ports needed for digital pins, LEDs, button, SPI, I2C */
+/* ------------------------------------------------------------------ */
+&gpio_prt8 {
+	status = "okay";
+};
+
+&gpio_prt21 {
+	status = "okay";
+};
+
+/* ------------------------------------------------------------------ */
+/* I2C bus - SCB0 on P8_0(SCL) / P8_1(SDA)                           */
+/* ------------------------------------------------------------------ */
+i2c0: &scb0 {
+	compatible = "infineon,i2c";
+	status = "okay";
+	#address-cells = <1>;
+	#size-cells = <0>;
+	clock-frequency = <100000>;
+
+	clocks = <&peri0_group1_16bit_1>;
+
+	pinctrl-0 = <&p8_0_scb0_i2c_scl &p8_1_scb0_i2c_sda>;
+	pinctrl-names = "default";
+};
+
+&peri0_group1_16bit_1 {
+	status = "okay";
+	clock-div = <1>;
+};
+
+&p8_0_scb0_i2c_scl {
+	drive-open-drain;
+	input-enable;
+};
+
+&p8_1_scb0_i2c_sda {
+	drive-open-drain;
+	input-enable;
+};
+
+/* ------------------------------------------------------------------ */
+/* SPI bus - SCB3 on P21_6(CLK) / P21_5(MOSI) / P21_4(MISO)         */
+/*           CS on P21_7 (directly driven as GPIO)                    */
+/* ------------------------------------------------------------------ */
+spi0: &scb3 {
+	#address-cells = <1>;
+	#size-cells = <0>;
+	compatible = "infineon,spi";
+	status = "okay";
+
+	clocks = <&peri0_group1_16bit_2>;
+
+	pinctrl-0 = <&p21_5_scb3_spi_m_mosi &p21_4_scb3_spi_m_miso
+		     &p21_6_scb3_spi_m_clk>;
+	pinctrl-names = "default";
+	cs-gpios = <&gpio_prt21 7 GPIO_ACTIVE_LOW>;
+};
+
+&peri0_group1_16bit_2 {
+	status = "okay";
+	clock-div = <1>;
+};
+
+&p21_5_scb3_spi_m_mosi {
+	drive-strength = "full";
+	drive-push-pull;
+};
+
+&p21_4_scb3_spi_m_miso {
+	drive-strength = "full";
+	input-enable;
+};
+
+&p21_6_scb3_spi_m_clk {
+	drive-strength = "full";
+	drive-push-pull;
+};
+
+/* ------------------------------------------------------------------ */
+/* Arduino 'zephyr,user' node                                         */
+/*                                                                    */
+/* Digital pin mapping:                                                */
+/*   D0  = P10_7  (LED_0 / USER_LED1)                                */
+/*   D1  = P10_5  (LED_1 / USER_LED2)                                */
+/*   D2  = P20_6  (LED_RGB_RED)                                      */
+/*   D3  = P20_4  (LED_RGB_GREEN)                                    */
+/*   D4  = P20_5  (LED_RGB_BLUE)                                     */
+/*   D5  = P7_0   (SW1 / USER_BTN)                                   */
+/*   D6  = P8_0   (I2C_SCL)                                          */
+/*   D7  = P8_1   (I2C_SDA)                                          */
+/*   D8  = P21_6  (SPI_CLK)                                          */
+/*   D9  = P21_5  (SPI_MOSI)                                         */
+/*   D10 = P21_4  (SPI_MISO)                                         */
+/*   D11 = P21_7  (SPI_CS)                                           */
+/* ------------------------------------------------------------------ */
+/ {
+	zephyr,user {
+		digital-pin-gpios = <&gpio_prt10 7 0>,  /* D0  - LED_0       */
+				    <&gpio_prt10 5 0>,  /* D1  - LED_1       */
+				    <&gpio_prt20 6 0>,  /* D2  - LED_RGB_RED */
+				    <&gpio_prt20 4 0>,  /* D3  - LED_RGB_GRN */
+				    <&gpio_prt20 5 0>,  /* D4  - LED_RGB_BLU */
+				    <&gpio_prt7  0 0>,  /* D5  - SW1 / BTN   */
+				    <&gpio_prt8  0 0>,  /* D6  - I2C_SCL     */
+				    <&gpio_prt8  1 0>,  /* D7  - I2C_SDA     */
+				    <&gpio_prt21 6 0>,  /* D8  - SPI_CLK     */
+				    <&gpio_prt21 5 0>,  /* D9  - SPI_MOSI    */
+				    <&gpio_prt21 4 0>,  /* D10 - SPI_MISO    */
+				    <&gpio_prt21 7 0>;  /* D11 - SPI_CS      */
+
+		builtin-led-gpios = <&gpio_prt10 7 GPIO_ACTIVE_HIGH>,  /* LED_0 (default) */
+				    <&gpio_prt10 7 GPIO_ACTIVE_HIGH>,  /* LED_0            */
+				    <&gpio_prt10 5 GPIO_ACTIVE_HIGH>,  /* LED_1            */
+				    <&gpio_prt20 6 GPIO_ACTIVE_HIGH>;  /* LED_RGB_RED      */
+
+		serials = <&uart2>;
+		i2cs = <&i2c0>;
+		spis = <&spi0>;
+	};
+};
