@@ -1,8 +1,5 @@
 name: Release
 
-permissions:
-  contents: write
-
 on:
   push:
     tags:
@@ -21,7 +18,7 @@ on:
 
 jobs:
   arduino-devops:
-    uses: Infineon/arduino-devops/.github/workflows/release.yml@main
+    uses: Infineon/arduino-devops/.github/workflows/release.yml@latest
     with:
       version: ${{ inputs.version }}
     secrets: inherit
