@@ -1,0 +1,50 @@
+{
+    "packages": [
+        {
+            "name": "Infineon",
+            "maintainer": "Your Name",
+            "websiteURL": "https://github.com/michal-gora/ArduinoCore-zephyr",
+            "email": "your@email.com",
+            "platforms": [
+                {
+                    "name": "Infineon PSoC Edge Boards",
+                    "architecture": "zephyr_pse84",
+                    "version": "",
+                    "category": "Contributed",
+                    "url": "",
+                    "archiveFileName": "",
+                    "checksum": "",
+                    "size": "",
+                    "help": {
+                        "online": "https://github.com/michal-gora/ArduinoCore-zephyr"
+                    },
+                    "boards": [
+                        { "name": "Infineon KIT-PSE84-AI (PSoC Edge E84)" }
+                    ],
+                    "toolsDependencies": [
+                        {
+                            "packager": "Infineon",
+                            "name": "openocd_infineon",
+                            "version": "5.16.1.4486"
+                        }
+                    ]
+                }
+            ],
+            "tools": [
+                {
+                    "name": "openocd_infineon",
+                    "version": "5.16.1.4486",
+                    "systems": [
+                        {
+                            "host": "i686-mingw32",
+                            "archiveFileName": "openocd-5.16.1.4486-windows.zip",
+                            "url": "https://github.com/Infineon/openocd/releases/download/release-v5.16.1/openocd-5.16.1.4486-windows.zip",
+                            "checksum": "SHA-256:5BFDE009A525C6A2490F50456EFC18BA8420892D0E7B5A2A47E7727603DEEC87",
+                            "size": "5690850"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
