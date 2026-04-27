@@ -26,7 +26,7 @@
           "toolsDependencies": [
             {
               "packager": "infineon",
-              "name": "openocd",
+              "name": "openocd_infineon",
               "version": "5.2.1.3248"
             },
             {
@@ -39,7 +39,7 @@
       ],
       "tools": [
         {
-          "name": "openocd",
+          "name": "openocd_infineon",
           "version": "5.2.1.3248",
           "systems": [
             {
