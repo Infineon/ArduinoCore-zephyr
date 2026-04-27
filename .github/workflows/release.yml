@@ -18,7 +18,7 @@ on:
 
 jobs:
   arduino-devops:
-    uses: Infineon/arduino-devops/.github/workflows/release.yml@0.16.0
+    uses: Infineon/arduino-devops/.github/workflows/release.yml@latest
     with:
       version: ${{ inputs.version }}
     secrets: inherit
