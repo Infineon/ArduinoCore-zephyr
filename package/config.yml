@@ -10,5 +10,5 @@ include:
 index-name: package_infineon_pse84_index
 server:
     type: github
-    owner: Infineon
+    owner: michal-gora
     repo: ArduinoCore-zephyr
