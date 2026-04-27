@@ -84,9 +84,9 @@
             {
               "host": "i686-mingw32",
               "archiveFileName": "toolchain_gnu_windows-x86_64_arm-zephyr-eabi-1.0.1.tar.xz",
-              "url": "https://github.com/michal-gora/ArduinoCore-zephyr/releases/download/RELEASE_TAG/toolchain_gnu_windows-x86_64_arm-zephyr-eabi-1.0.1.tar.xz",
-              "checksum": "SHA-256:WINDOWS_CHECKSUM",
-              "size": "WINDOWS_SIZE"
+              "url": "https://github.com/michal-gora/ArduinoCore-zephyr/releases/download/0.1.6/toolchain_gnu_windows-x86_64_arm-zephyr-eabi-1.0.1.tar.xz",
+              "checksum": "SHA-256:8601aa8377e29658e18bb6d6fc0fe693d4653f2f1f203092e64cb8e6d87ebbf5",
+              "size": "96854412"
             },
             {
               "host": "x86_64-linux-gnu",
