@@ -30,7 +30,7 @@
               "version": "5.2.1.3248"
             },
             {
-              "packager": "infineon",
+              "packager": "zephyr",
               "name": "arm-zephyr-eabi",
               "version": "1.0.1"
             }
@@ -65,19 +65,31 @@
             }
           ]
         },
+      ]
+    },
+    {
+      "name": "zephyr",
+      "maintainer": "The Zephyr Project",
+      "websiteURL": "https://zephyrproject.org/",
+      "email": "devel@zephyrproject.org",
+      "help": {
+        "online": "https://docs.zephyrproject.org/latest/"
+      },
+      "platforms": [],
+      "tools": [
         {
           "name": "arm-zephyr-eabi",
           "version": "1.0.1",
           "systems": [
             {
-              "host": "x86_64-mingw32",
-              "archiveFileName": "toolchain_gnu_windows-x86_64_arm-zephyr-eabi.7z",
-              "url": "https://github.com/zephyrproject-rtos/sdk-ng/releases/download/v1.0.1/toolchain_gnu_windows-x86_64_arm-zephyr-eabi.7z",
-              "checksum": "SHA-256:d08df2e83378dc8d28d0c67ab72d021ca633344b7a2bc053ababf9b8e677aa8d",
-              "size": "79217349"
+              "host": "i686-mingw32",
+              "archiveFileName": "toolchain_gnu_windows-x86_64_arm-zephyr-eabi-1.0.1.tar.xz",
+              "url": "https://github.com/michal-gora/ArduinoCore-zephyr/releases/download/RELEASE_TAG/toolchain_gnu_windows-x86_64_arm-zephyr-eabi-1.0.1.tar.xz",
+              "checksum": "SHA-256:WINDOWS_CHECKSUM",
+              "size": "WINDOWS_SIZE"
             },
             {
-              "host": "x86_64-pc-linux-gnu",
+              "host": "x86_64-linux-gnu",
               "archiveFileName": "toolchain_gnu_linux-x86_64_arm-zephyr-eabi.tar.xz",
               "url": "https://github.com/zephyrproject-rtos/sdk-ng/releases/download/v1.0.1/toolchain_gnu_linux-x86_64_arm-zephyr-eabi.tar.xz",
               "checksum": "SHA-256:21b85981cb5a1818d9bc53d82af80f208946ec038b982ff1907287572ed3a634",
