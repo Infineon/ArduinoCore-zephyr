@@ -103,6 +103,13 @@ for variant in $INCLUDED_VARIANTS ; do
 		log_msg error "No firmware for '${variant}' found."
 		RET=3
 	fi
+
+	# verify Zephyr-generated variant artifacts exist (llext-edk and build flags)
+	if [ ! -d "variants/${variant}/llext-edk" ] || [ ! -f "variants/${variant}/includes.txt" ] \
+	   || [ ! -f "variants/${variant}/cflags.txt" ] || [ ! -f "variants/${variant}/cxxflags.txt" ]; then
+		log_msg error "Missing generated files for variant '${variant}'. Run './extra/build.sh ${variant}' and include the resulting 'variants/${variant}/' and 'firmwares/' in the build artifacts."
+		RET=3
+	fi
 done
 
 # create the list of files and directories to exclude
