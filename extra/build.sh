@@ -72,11 +72,31 @@ else
 	echo "Build variant: $variant"
 fi
 
+
 # Build the loader
 BUILD_DIR=build/${variant}
 VARIANT_DIR=variants/${variant}
 rm -rf ${BUILD_DIR}
-west build -d ${BUILD_DIR} -b ${target} loader -t llext-edk ${args}
+
+# --- FORCE CONFIG_DYNAMIC_INTERRUPTS=n for Infineon variant ---
+if [ "${variant}" = "kit_pse84_ai_pse846gps2dbzc4a_m33" ]; then
+	mkdir -p ${BUILD_DIR}
+	echo "CONFIG_DYNAMIC_INTERRUPTS=n" > ${BUILD_DIR}/arduino_force.conf
+	# Pass extra Kconfig fragment to west build
+	west build -d ${BUILD_DIR} -b ${target} loader -t llext-edk ${args} -- -DEXTRA_CONF_FILE=arduino_force.conf
+else
+	west build -d ${BUILD_DIR} -b ${target} loader -t llext-edk ${args}
+fi
+
+# Print merged .config for debugging
+if [ -f ${BUILD_DIR}/zephyr/.config ]; then
+	echo "--- DEBUG: merged .config for ${variant} ---"
+	grep -n "DYNAMIC_INTERRUPTS\|IRQ\|ARCH_IRQ" ${BUILD_DIR}/zephyr/.config || true
+	echo "--- full .config (first 240 lines) ---"
+	sed -n '1,240p' ${BUILD_DIR}/zephyr/.config || true
+else
+	echo "no ${BUILD_DIR}/zephyr/.config present"
+fi
 
 # Extract the generated EDK tarball and copy it to the variant directory
 mkdir -p ${VARIANT_DIR} firmwares
