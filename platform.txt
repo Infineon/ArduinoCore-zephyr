@@ -162,204 +162,31 @@ pluggable_monitor.required.serial=builtin:serial-monitor
 
 # Uploader tools
 # --------------
-
 #
-# OpenOCD
-#
-tools.openocd.path={runtime.tools.openocd-0.12.0-arduino1-static.path}
-tools.openocd.cmd=bin/openocd
-tools.openocd.cmd.windows=bin/openocd.exe
-
-tools.openocd.upload.params.verbose=-d2
-tools.openocd.upload.params.quiet=-d0
-tools.openocd.upload.pattern="{path}/{cmd}" {upload.verbose} -s "{path}/share/openocd/scripts/" {upload.programmer} {upload.config} -c "telnet_port disabled; init; reset init; halt; adapter speed 10000; flash write_image erase {build.path}/{build.project_name}.{upload.extension} {upload.address} bin; reset run; shutdown"
-
-tools.openocd.program.params.verbose=-d2
-tools.openocd.program.params.quiet=-d0
-tools.openocd.program.pattern="{path}/{cmd}" {program.verbose} -s "{path}/share/openocd/scripts/" {upload.programmer} {upload.config} -c "telnet_port disabled; init; reset init; halt; adapter speed 10000; flash write_image erase {build.path}/{build.project_name}.{upload.extension} {upload.address} bin; reset run; shutdown"
-
-tools.openocd.erase.params.verbose=-d2
-tools.openocd.erase.params.quiet=-d0
-tools.openocd.erase.pattern=
-
-tools.openocd.bootloader.params.verbose=-d2
-tools.openocd.bootloader.params.quiet=-d0
-tools.openocd.bootloader.pattern="{path}/{cmd}" {bootloader.verbose} -s "{path}/share/openocd/scripts/" {upload.programmer} {upload.config} -c "telnet_port disabled; init; reset init; halt; adapter speed 10000; program {runtime.platform.path}/firmwares/{bootloader.file}; reset run; shutdown"
-
-#
-# Infineon OpenOCD (for PSoC Edge and other Infineon boards requiring KitProg3)
+# OpenOCD (Infineon, for PSoC Edge and other Infineon boards requiring KitProg3)
 # Distributed as a separate tool package: openocd_infineon
 # Scripts and interface/target configs are inside the tool package.
 # qspi_config.cfg must be present in the variant directory (copied there by setup).
 #
-tools.openocd_infineon.path={runtime.tools.openocd_infineon.path}
-tools.openocd_infineon.cmd=bin/openocd
-tools.openocd_infineon.cmd.windows=bin/openocd.exe
-
-tools.openocd_infineon.upload.params.verbose=-d2
-tools.openocd_infineon.upload.params.quiet=-d0
-tools.openocd_infineon.upload.pattern="{path}/{cmd}" {upload.verbose} -s "{path}/scripts/" -s "{runtime.platform.path}/variants/{build.variant}/" -f interface/kitprog3.cfg -f target/infineon/pse84xgxs2.cfg -c "telnet_port disabled; init; reset init; halt; adapter speed 10000; flash write_image erase {build.path}/{build.project_name}.{upload.extension} {upload.address} bin; reset run; shutdown"
-
-tools.openocd_infineon.program.params.verbose=-d2
-tools.openocd_infineon.program.params.quiet=-d0
-tools.openocd_infineon.program.pattern="{path}/{cmd}" {program.verbose} -s "{path}/scripts/" -s "{runtime.platform.path}/variants/{build.variant}/" -f interface/kitprog3.cfg -f target/infineon/pse84xgxs2.cfg -c "telnet_port disabled; init; reset init; halt; adapter speed 10000; flash write_image erase {build.path}/{build.project_name}.{upload.extension} {upload.address} bin; reset run; shutdown"
-
-tools.openocd_infineon.erase.params.verbose=-d2
-tools.openocd_infineon.erase.params.quiet=-d0
-tools.openocd_infineon.erase.pattern=
-
-tools.openocd_infineon.bootloader.params.verbose=-d2
-tools.openocd_infineon.bootloader.params.quiet=-d0
-tools.openocd_infineon.bootloader.pattern="{path}/{cmd}" {bootloader.verbose} -s "{path}/scripts/" -s "{runtime.platform.path}/variants/{build.variant}/" -f interface/kitprog3.cfg -f target/infineon/pse84xgxs2.cfg -c "program {runtime.platform.path}/firmwares/{bootloader.file} reset exit"
-
-#
-# BOSSA
-#
-tools.bossac.path={runtime.tools.bossac-1.9.1-arduino2.path}
-tools.bossac.cmd=bossac
-tools.bossac.cmd.windows=bossac.exe
-
-tools.bossac.upload.params.verbose=-d
-tools.bossac.upload.params.quiet=
-tools.bossac.upload.pattern="{path}/{cmd}" {upload.verbose} --port={serial.port.file} -U -i -e -w "{build.path}/{build.project_name}.{upload.extension}" --offset {upload.address} -R
-
-tools.bossac.bootloader.params.verbose=-d
-tools.bossac.bootloader.params.quiet=
-tools.bossac.bootloader.pattern="{path}/{cmd}" {upload.verbose} --port={serial.port.file} -U -i -e -w "{runtime.platform.path}/firmwares/{bootloader.file}" --offset {bootloader.address} -R
-
-tools.bossac.erase.params.verbose=
-tools.bossac.erase.params.quiet=
-tools.bossac.erase.pattern=
-
-#
-# STM32FLASH
-#
-tools.stm32flash.cmd=stm32flash
-tools.stm32flash.path={runtime.platform.path}/tools/windows
-tools.stm32flash.path.macosx={runtime.platform.path}/tools/macosx
-tools.stm32flash.path.linux={runtime.platform.path}/tools/linux
-tools.stm32flash.upload.params.verbose=-v
-tools.stm32flash.upload.params.quiet=
-tools.stm32flash.upload.pattern="{path}/{cmd}" {serial.port} -e 1024 -b 2400 -w "{build.path}/{build.project_name}.bin"
-tools.stm32flash.program.params.verbose=-v
-tools.stm32flash.program.params.quiet=
-tools.stm32flash.program.pattern="{path}/{cmd}" {serial.port} -e 1024 -b 2400 -w "{build.path}/{build.project_name}.bin"
-tools.stm32flash.erase.params.verbose=-v
-tools.stm32flash.erase.params.quiet=
-tools.stm32flash.erase.pattern="{path}/{cmd}" {serial.port} -e 1024 -b 2400
-
-#
-# DFU_UTIL
-#
-
-upload.dfuse=--dfuse-address={upload.address}:leave
-bootloader.dfuse=--dfuse-address={bootloader.address}:leave
-
-tools.dfu-util.path={runtime.tools.dfu-util.path}
-tools.dfu-util.cmd=dfu-util
-tools.dfu-util.upload.params.verbose=-d
-tools.dfu-util.upload.params.quiet=
-tools.dfu-util.upload.pattern="{path}/{cmd}" --device ,{upload.vid}:{upload.pid} -D "{build.path}/{build.project_name}.{upload.extension}" -a{upload.interface} {upload.dfuse}
-
-tools.dfu-util.bootloader.params.verbose=-d
-tools.dfu-util.bootloader.params.quiet=
-tools.dfu-util.bootloader.pattern="{path}/{cmd}" --device ,{bootloader.vid}:{bootloader.pid} -D "{runtime.platform.path}/firmwares/{bootloader.file}" -a{bootloader.interface} {bootloader.dfuse}
-
-tools.dfu-util.erase.params.verbose=
-tools.dfu-util.erase.params.quiet=
-tools.dfu-util.erase.pattern=
-
-#
-# PICOTOOL
-#
-tools.picotool.path={runtime.tools.rp2040tools.path}
-tools.picotool.cmd=rp2040load
-tools.picotool.upload.params.verbose=-v
-tools.picotool.upload.params.quiet=
-tools.picotool.upload.pattern="{path}/{cmd}" {upload.verbose} -D "{build.path}/{build.project_name}.elf"
-
-#
-# IMGTOOL
-#
-
-tools.imgtool.path={runtime.tools.imgtool.path}
-tools.imgtool.cmd=imgtool
-tools.imgtool.flags=sign --key "{build.keys.keychain}/{build.keys.sign_key}" --encrypt "{build.keys.keychain}/{build.keys.encrypt_key}" "{build.path}/{build.project_name}.bin" "{build.path}/{build.project_name}.bin" --align {build.alignment} --max-align {build.alignment} --version {build.version} --header-size {build.header_size} --pad-header --slot-size {build.slot_size}
-
-#
-# ADB WRAPPER
-#
-
-tools.adb.path={runtime.tools.adb.path}
-tools.adb.cmd=adb
-tools.adb.upload.params.verbose=-v
-tools.adb.upload.params.quiet=
-tools.adb.upload.pattern="{path}/{cmd}" push "{build.path}/{build.project_name}.elf" "/tmp/arduino/m4-user-sketch.elf"
-
-#
-# REMOTEOCD
-#
-tools.remoteocd.path={runtime.tools.remoteocd.path}
-tools.remoteocd.cmd=remoteocd
-tools.remoteocd.upload.params.verbose=--verbose
-tools.remoteocd.upload.params.quiet=
-tools.remoteocd.upload.pattern="{path}/{cmd}" upload --adb-path "{runtime.tools.adb.path}/adb" -s "{upload.port.properties.serialNumber}" -f "{build.variant.path}/{openocd_cfg}" "{upload.verbose}" "{build.path}/{build.project_name}.{upload.extension}" 
-
-tools.remoteocd.bootloader.params.verbose=--verbose
-tools.remoteocd.bootloader.params.quiet=
-tools.remoteocd.erase.pattern=
-tools.remoteocd.bootloader.pattern="{path}/{cmd}" upload --adb-path "{runtime.tools.adb.path}/adb" -s "{upload.port.properties.serialNumber}" -f "{build.variant.path}/flash_bootloader.cfg" "{upload.verbose}" "{runtime.platform.path}/firmwares/{bootloader.file}" 
-
-tools.remoteocd_network.upload.protocol=network
-tools.remoteocd_network.upload.field.password=Password
-tools.remoteocd_network.upload.field.password.secret=true
-tools.remoteocd_network.path={runtime.tools.remoteocd.path}
-tools.remoteocd_network.cmd=remoteocd
-tools.remoteocd_network.upload.params.verbose=--verbose
-tools.remoteocd_network.upload.params.quiet=
-tools.remoteocd_network.upload.pattern="{path}/{cmd}" upload -a "{upload.port.address}" --password "{upload.field.password}" -f "{build.variant.path}/{openocd_cfg}" "{upload.verbose}" "{build.path}/{build.project_name}.{upload.extension}" 
-
-#
-# PYOCD WRAPPER
-#
-
-# TODO: at the moment, install pyocd manually (with provided script)
-#tools.pyocd.path={runtime.tools.pyocd.path}
-tools.pyocd.path=
-tools.pyocd.cmd=pyocd
-tools.pyocd.upload.params.verbose=
-tools.pyocd.upload.params.quiet=
-tools.pyocd.upload.pattern="{cmd}" load --target {upload.target} {build.path}/{build.project_name}.{upload.extension}@{upload.address}
-
-tools.pyocd.bootloader.params.verbose=
-tools.pyocd.bootloader.params.quiet=
-tools.pyocd.bootloader.pattern="{cmd}" load --target {bootloader.target} "{runtime.platform.path}/firmwares/{bootloader.file}"
-
-tools.pyocd.erase.params.verbose=
-tools.pyocd.erase.params.quiet=
-tools.pyocd.erase.pattern=
-
-
-#
-# JLinkExe WRAPPER
-#
-
-tools.jlink.path={runtime.tools.jlink.path}
-tools.jlink.cmd.linux=JLinkExe
-tools.jlink.cmd.windows=JLink.exe
-tools.jlink.cmd.darwin=JLinkExe
-tools.jlink.upload.params.verbose=-v
-tools.jlink.upload.params.quiet=
-tools.jlink.upload.pattern="{path}/{cmd}" -CommanderScript "{build.path}/flasher.jlink"
-
+tools.openocd.path={runtime.tools.openocd_infineon.path}
+tools.openocd.cmd=bin/openocd
+tools.openocd.cmd.windows=bin/openocd.exe
+tools.openocd.upload.params.verbose=-d2
+tools.openocd.upload.params.quiet=-d0
+tools.openocd.upload.pattern="{path}/{cmd}" {upload.verbose} -s "{path}/scripts/" -s "{runtime.platform.path}/variants/{build.variant}/" -f interface/kitprog3.cfg -f target/infineon/pse84xgxs2.cfg -c "telnet_port disabled; init; reset init; halt; adapter speed 10000; flash write_image erase {build.path}/{build.project_name}.{upload.extension} {upload.address} bin; reset run; shutdown"
+tools.openocd.program.params.verbose=-d2
+tools.openocd.program.params.quiet=-d0
+tools.openocd.program.pattern="{path}/{cmd}" {program.verbose} -s "{path}/scripts/" -s "{runtime.platform.path}/variants/{build.variant}/" -f interface/kitprog3.cfg -f target/infineon/pse84xgxs2.cfg -c "telnet_port disabled; init; reset init; halt; adapter speed 10000; flash write_image erase {build.path}/{build.project_name}.{upload.extension} {upload.address} bin; reset run; shutdown"
+tools.openocd.erase.params.verbose=-d2
+tools.openocd.erase.params.quiet=-d0
+tools.openocd.erase.pattern=
+tools.openocd.bootloader.params.verbose=-d2
+tools.openocd.bootloader.params.quiet=-d0
+tools.openocd.bootloader.pattern="{path}/{cmd}" {bootloader.verbose} -s "{path}/scripts/" -s "{runtime.platform.path}/variants/{build.variant}/" -f interface/kitprog3.cfg -f target/infineon/pse84xgxs2.cfg -c "program {runtime.platform.path}/firmwares/{bootloader.file} reset exit"
 
 #
 # Debugger
 #
-
-tools.gdb.path={runtime.tools.arm-none-eabi-gcc-7-2017q4.path}/bin/
-tools.gdb.cmd=arm-none-eabi-gdb
-tools.gdb.cmd.windows=arm-none-eabi-gdb.exe
 
 debug.executable={build.path}/{build.project_name}_debug.elf
 debug.toolchain=gcc
