@@ -79,12 +79,11 @@ VARIANT_DIR=variants/${variant}
 rm -rf ${BUILD_DIR}
 
 
+
 # --- FORCE CONFIG_DYNAMIC_INTERRUPTS=n for Infineon variant ---
 if [ "${variant}" = "kit_pse84_ai_pse846gps2dbzc4a_m33" ]; then
-	# Place the fragment in the loader/ directory (where CMake expects it)
-	echo "CONFIG_DYNAMIC_INTERRUPTS=n" > loader/arduino_force.conf
-	west build -d ${BUILD_DIR} -b ${target} loader -t llext-edk ${args} -- -DEXTRA_CONF_FILE=arduino_force.conf
-	rm -f loader/arduino_force.conf
+	echo "[INFO] Forcing CONFIG_DYNAMIC_INTERRUPTS=n for Infineon variant (${variant}) via -DCONFIG_DYNAMIC_INTERRUPTS=n"
+	west build -d ${BUILD_DIR} -b ${target} loader -t llext-edk ${args} -- -DCONFIG_DYNAMIC_INTERRUPTS=n
 else
 	west build -d ${BUILD_DIR} -b ${target} loader -t llext-edk ${args}
 fi
