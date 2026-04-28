@@ -164,6 +164,38 @@ jobs:
             echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
             cat $REPORT.stderr >> $GITHUB_STEP_SUMMARY
             echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+
+            # --- DEBUG HELPERS ---
+            # Dump the merged kernel config and check dynamic-interrupt flags
+            echo "--- BEGIN DEBUG: merged .config ---" >> $REPORT.stderr || true
+            if [ -f build/${{ matrix.variant }}/zephyr/.config ]; then
+              echo "(showing config snippet around DYNAMIC_INTERRUPTS)" >> $REPORT.stderr || true
+              grep -n "DYNAMIC_INTERRUPTS\|IRQ\|ARCH_IRQ" build/${{ matrix.variant }}/zephyr/.config || true
+              echo "--- full .config ---" >> $REPORT.stderr || true
+              sed -n '1,240p' build/${{ matrix.variant }}/zephyr/.config >> $REPORT.stderr || true
+            else
+              echo "no build/${{ matrix.variant }}/zephyr/.config present" >> $REPORT.stderr || true
+            fi
+
+            # Try to list symbols in app and zephyr static libs to find where symbol should come from
+            echo "--- nm search for arch_irq_disconnect_dynamic in built libs ---" >> $REPORT.stderr || true
+            for f in build/${{ matrix.variant }}/app/libapp.a build/${{ matrix.variant }}/zephyr/*.a ; do
+              if [ -f "$f" ]; then
+                echo "-- $f --" >> $REPORT.stderr || true
+                arm-zephyr-eabi-nm -A "$f" 2>/dev/null | grep arch_irq_disconnect_dynamic || true
+              fi
+            done
+
+            # Dump the linker map if it exists
+            if [ -f build/${{ matrix.variant }}/zephyr/zephyr_pre0.map ]; then
+              echo "--- linker map ---" >> $REPORT.stderr || true
+              sed -n '1,240p' build/${{ matrix.variant }}/zephyr/zephyr_pre0.map >> $REPORT.stderr || true
+            else
+              echo "no linker map found" >> $REPORT.stderr || true
+            fi
+
+            # End debug helpers
+
             exit 1
           fi
 
