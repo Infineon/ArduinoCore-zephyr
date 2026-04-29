@@ -164,11 +164,11 @@ pluggable_monitor.required.serial=builtin:serial-monitor
 # --------------
 #
 # OpenOCD (Infineon, for PSoC Edge and other Infineon boards requiring KitProg3)
-# Distributed as a separate tool package: openocd_infineon
+# Distributed as a separate tool package: openocd
 # Scripts and interface/target configs are inside the tool package.
 # qspi_config.cfg must be present in the variant directory (copied there by setup).
 #
-tools.openocd.path={runtime.tools.openocd_infineon.path}
+tools.openocd.path={runtime.tools.openocd.path}
 tools.openocd.cmd=bin/openocd
 tools.openocd.cmd.windows=bin/openocd.exe
 tools.openocd.upload.params.verbose=-d2
