@@ -7,6 +7,11 @@ set -e
 
 source venv/bin/activate
 
+# --- DEBUG: Temporary install of cryptography for imgtool.py test ---
+# Remove this block if not needed!
+echo "[DEBUG] Installing cryptography package for imgtool.py test (remove if unnecessary)"
+pip install cryptography
+
 ZEPHYR_BASE=$(west topdir)/zephyr
 
 if [ x$ZEPHYR_SDK_INSTALL_DIR == x"" ]; then
