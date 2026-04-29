@@ -423,14 +423,14 @@ FORCE_EXPORT_SYM(can_add_rx_filter);
 #endif
 
 #if defined(CONFIG_DYNAMIC_INTERRUPTS)
-EXPORT_SYMBOL(arch_irq_connect_dynamic);
-EXPORT_SYMBOL(arch_irq_disconnect_dynamic);
-EXPORT_SYMBOL(k_is_in_isr);
-EXPORT_SYMBOL(k_is_preempt_thread);
-EXPORT_SYMBOL(arm_irq_enable);
-EXPORT_SYMBOL(arm_irq_disable);
-EXPORT_SYMBOL(arm_irq_is_enabled);
-EXPORT_SYMBOL(arm_irq_priority_set);
+// EXPORT_SYMBOL(arch_irq_connect_dynamic);
+// EXPORT_SYMBOL(arch_irq_disconnect_dynamic);
+// EXPORT_SYMBOL(k_is_in_isr);
+// EXPORT_SYMBOL(k_is_preempt_thread);
+// EXPORT_SYMBOL(arm_irq_enable);
+// EXPORT_SYMBOL(arm_irq_disable);
+// EXPORT_SYMBOL(arm_irq_is_enabled);
+// EXPORT_SYMBOL(arm_irq_priority_set);
 #endif
 
 #if defined(__arm__)
