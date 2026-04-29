@@ -94,8 +94,10 @@ print_config_debug() {
 
 if [ "${variant}" = "kit_pse84_ai_pse846gps2dbzc4a_m33" ]; then
 	echo "[INFO] Forcing CONFIG_DYNAMIC_INTERRUPTS=n for Infineon variant (${variant}) via -DCONFIG_DYNAMIC_INTERRUPTS=n"
+	echo "[DEBUG] Full west build command: west build -d ${BUILD_DIR} -b ${target} loader -t llext-edk ${args} -- -DCONFIG_DYNAMIC_INTERRUPTS=n -DCONFIG_BOOTLOADER_MCUBOOT=n"
 	west build -d ${BUILD_DIR} -b ${target} loader -t llext-edk ${args} -- -DCONFIG_DYNAMIC_INTERRUPTS=n -DCONFIG_BOOTLOADER_MCUBOOT=n || { print_config_debug; exit 1; }
 else
+	echo "[DEBUG] Full west build command: west build -d ${BUILD_DIR} -b ${target} loader -t llext-edk ${args} -- -DCONFIG_DYNAMIC_INTERRUPTS=n -DCONFIG_BOOTLOADER_MCUBOOT=n"
 	west build -d ${BUILD_DIR} -b ${target} loader -t llext-edk ${args} -- -DCONFIG_DYNAMIC_INTERRUPTS=n -DCONFIG_BOOTLOADER_MCUBOOT=n || { print_config_debug; exit 1; }
 fi
 
