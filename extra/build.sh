@@ -81,22 +81,25 @@ rm -rf ${BUILD_DIR}
 
 
 # --- FORCE CONFIG_DYNAMIC_INTERRUPTS=n for Infineon variant ---
+print_config_debug() {
+	if [ -f ${BUILD_DIR}/zephyr/.config ]; then
+		echo "--- DEBUG: merged .config for ${variant} ---"
+		grep -n "DYNAMIC_INTERRUPTS\|IRQ\|ARCH_IRQ" ${BUILD_DIR}/zephyr/.config || true
+		echo "--- full .config (first 240 lines) ---"
+		sed -n '1,240p' ${BUILD_DIR}/zephyr/.config || true
+	else
+		echo "no ${BUILD_DIR}/zephyr/.config present"
+	fi
+}
+
 if [ "${variant}" = "kit_pse84_ai_pse846gps2dbzc4a_m33" ]; then
 	echo "[INFO] Forcing CONFIG_DYNAMIC_INTERRUPTS=n for Infineon variant (${variant}) via -DCONFIG_DYNAMIC_INTERRUPTS=n"
-	west build -d ${BUILD_DIR} -b ${target} loader -t llext-edk ${args} -- -DCONFIG_DYNAMIC_INTERRUPTS=n
+	west build -d ${BUILD_DIR} -b ${target} loader -t llext-edk ${args} -- -DCONFIG_DYNAMIC_INTERRUPTS=n -DCONFIG_BOOTLOADER_MCUBOOT=n || { print_config_debug; exit 1; }
 else
-	west build -d ${BUILD_DIR} -b ${target} loader -t llext-edk ${args}
+	west build -d ${BUILD_DIR} -b ${target} loader -t llext-edk ${args} -- -DCONFIG_DYNAMIC_INTERRUPTS=n -DCONFIG_BOOTLOADER_MCUBOOT=n || { print_config_debug; exit 1; }
 fi
 
-# Print merged .config for debugging
-if [ -f ${BUILD_DIR}/zephyr/.config ]; then
-	echo "--- DEBUG: merged .config for ${variant} ---"
-	grep -n "DYNAMIC_INTERRUPTS\|IRQ\|ARCH_IRQ" ${BUILD_DIR}/zephyr/.config || true
-	echo "--- full .config (first 240 lines) ---"
-	sed -n '1,240p' ${BUILD_DIR}/zephyr/.config || true
-else
-	echo "no ${BUILD_DIR}/zephyr/.config present"
-fi
+print_config_debug
 
 # Extract the generated EDK tarball and copy it to the variant directory
 mkdir -p ${VARIANT_DIR} firmwares
