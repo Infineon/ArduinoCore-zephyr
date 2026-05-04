@@ -283,8 +283,12 @@ jobs:
 
       - name: Package core
         run: |
+          # Verify the API submodule is populated (actions/checkout submodules can fail silently)
+          if [ ! -f cores/arduino/api/ArduinoAPI.h ]; then
+            echo "::warning::API submodule not populated by checkout, initializing manually"
+            git submodule update --init --recursive
+          fi
           # Extract board binaries in place
-          # (cores/arduino/api is already populated by the checkout above)
           for f in binaries-*.tar.zstd ; do
             tar --use-compress-program=unzstd -xpf $f
           done
