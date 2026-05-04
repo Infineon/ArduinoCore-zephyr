@@ -423,14 +423,12 @@ FORCE_EXPORT_SYM(can_add_rx_filter);
 #endif
 
 #if defined(CONFIG_DYNAMIC_INTERRUPTS)
+// NOTE: arch_irq_disconnect_dynamic does not exist on ARM Cortex-M (no HW mechanism).
+// arm_irq_enable/disable/is_enabled/priority_set are static inlines — not linkable.
+// Only connect_dynamic, k_is_in_isr, and k_is_preempt_thread are safe to export.
 EXPORT_SYMBOL(arch_irq_connect_dynamic);
-EXPORT_SYMBOL(arch_irq_disconnect_dynamic);
 EXPORT_SYMBOL(k_is_in_isr);
 EXPORT_SYMBOL(k_is_preempt_thread);
-EXPORT_SYMBOL(arm_irq_enable);
-EXPORT_SYMBOL(arm_irq_disable);
-EXPORT_SYMBOL(arm_irq_is_enabled);
-EXPORT_SYMBOL(arm_irq_priority_set);
 #endif
 
 #if defined(__arm__)
