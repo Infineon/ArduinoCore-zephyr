@@ -85,22 +85,12 @@ jobs:
           echo "SUB_ARCHES=$(jq -c 'map(.subarch) | unique' <<< ${ALL_BOARD_DATA})" >> "$GITHUB_ENV"
           # Archive the build environment for later jobs
           (cd && tar cphf - .cmake work zephyr-sdk-* | zstd > build-env.tar.zstd)
-          # The API is only needed for packaging, not for building, so it's separate
-          tar cphf - cores/arduino/api | zstd > arduino-api.tar.zstd
 
       - name: Archive build environment
         uses: actions/upload-artifact@v7
         with:
           name: build-env
           path: ~/build-env.tar.zstd
-          retention-days: 1
-          archive: false
-
-      - name: Archive API snapshot
-        uses: actions/upload-artifact@v7
-        with:
-          name: arduino-api
-          path: arduino-api.tar.zstd
           retention-days: 1
           archive: false
 
@@ -284,12 +274,6 @@ jobs:
           persist-credentials: false
           fetch-tags: true
 
-      # Get the API snapshot
-      - uses: actions/download-artifact@v8
-        with:
-          path: .
-          name: arduino-api
-
       # Get all built binaries
       - uses: actions/download-artifact@v8
         with:
@@ -299,9 +283,8 @@ jobs:
 
       - name: Package core
         run: |
-          # Extract the API snapshot and board binaries in place
-          rm -rf cores/arduino/api # remove submodule dir (or broken symlink) before extracting snapshot
-          tar --use-compress-program=unzstd -xpf arduino-api.tar.zstd
+          # Extract board binaries in place
+          # (cores/arduino/api is already populated by the checkout above)
           for f in binaries-*.tar.zstd ; do
             tar --use-compress-program=unzstd -xpf $f
           done
@@ -330,7 +313,6 @@ jobs:
       - uses: geekyeggo/delete-artifact@v6
         with:
           name: |
-            arduino-api
             binaries-*
             build-env.tar.zstd
           failOnError: false
