@@ -96,11 +96,12 @@ jobs:
           # Archive the build environment for later jobs
           (cd && tar cphf - .cmake work zephyr-sdk-* | zstd > build-env.tar.zstd)
           # The API is only needed for packaging, not for building, so it's separate.
-          # Use 'west path' to locate the module regardless of workspace layout, then
-          # archive it under the cores/arduino/api/ prefix that package_core.sh expects.
+          # Use west to locate the module, stage it under the expected path, then archive.
           source venv/bin/activate
-          API_DIR="$(west list -f {abspath} ArduinoCore-API)/api"
-          tar cphf - --transform 's|^|cores/arduino/api/|' -C "${API_DIR}" . | zstd > arduino-api.tar.zstd
+          API_SRC="$(west list -f {abspath} ArduinoCore-API)/api"
+          mkdir -p /tmp/arduino-api/cores/arduino/api
+          cp -r "${API_SRC}/." /tmp/arduino-api/cores/arduino/api/
+          tar cphf - -C /tmp/arduino-api cores/arduino/api | zstd > arduino-api.tar.zstd
 
       - name: Archive build environment
         uses: actions/upload-artifact@v7
@@ -116,7 +117,6 @@ jobs:
           name: arduino-api
           path: arduino-api.tar.zstd
           retention-days: 1
-          archive: false
 
 
 
