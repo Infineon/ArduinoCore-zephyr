@@ -402,7 +402,7 @@ jobs:
           TOOL_DIR=~/.arduino15/packages/zephyr/tools/arm-zephyr-eabi/1.0.1
           if [ ! -d "$TOOL_DIR/bin" ]; then
             mkdir -p "$TOOL_DIR"
-            wget -q https://github.com/zephyrproject-rtos/sdk-ng/releases/download/v1.0.1/toolchain_linux-x86_64_arm-zephyr-eabi.tar.xz -O /tmp/arm-zephyr-eabi.tar.xz
+            wget -q https://github.com/zephyrproject-rtos/sdk-ng/releases/download/v1.0.1/toolchain_gnu_linux-x86_64_arm-zephyr-eabi.tar.xz -O /tmp/arm-zephyr-eabi.tar.xz
             tar -xf /tmp/arm-zephyr-eabi.tar.xz -C "$TOOL_DIR" --strip-components=1
             rm /tmp/arm-zephyr-eabi.tar.xz
           fi
