@@ -89,7 +89,7 @@ jobs:
           # Use 'west path' to locate the module regardless of workspace layout, then
           # archive it under the cores/arduino/api/ prefix that package_core.sh expects.
           source venv/bin/activate
-          API_DIR="$(west path ArduinoCore-API)/api"
+          API_DIR="$(west list -f {abspath} ArduinoCore-API)/api"
           tar cphf - --transform 's|^|cores/arduino/api/|' -C "${API_DIR}" . | zstd > arduino-api.tar.zstd
 
       - name: Archive build environment
