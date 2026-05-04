@@ -95,8 +95,12 @@ jobs:
           echo "SUB_ARCHES=$(jq -c 'map(.subarch) | unique' <<< ${ALL_BOARD_DATA})" >> "$GITHUB_ENV"
           # Archive the build environment for later jobs
           (cd && tar cphf - .cmake work zephyr-sdk-* | zstd > build-env.tar.zstd)
-          # The API is only needed for packaging, not for building, so it's separate
-          tar cphf - cores/arduino/api | zstd > arduino-api.tar.zstd
+          # The API is only needed for packaging, not for building, so it's separate.
+          # Use 'west path' to locate the module regardless of workspace layout, then
+          # archive it under the cores/arduino/api/ prefix that package_core.sh expects.
+          source venv/bin/activate
+          API_DIR="$(west path ArduinoCore-API)/api"
+          tar cphf - --transform 's|^|cores/arduino/api/|' -C "${API_DIR}" . | zstd > arduino-api.tar.zstd
 
       - name: Archive build environment
         uses: actions/upload-artifact@v7
