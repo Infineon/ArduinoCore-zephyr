@@ -95,12 +95,22 @@ jobs:
           echo "SUB_ARCHES=$(jq -c 'map(.subarch) | unique' <<< ${ALL_BOARD_DATA})" >> "$GITHUB_ENV"
           # Archive the build environment for later jobs
           (cd && tar cphf - .cmake work zephyr-sdk-* | zstd > build-env.tar.zstd)
+          # The API is only needed for packaging, not for building, so it's separate
+          tar cphf - cores/arduino/api | zstd > arduino-api.tar.zstd
 
       - name: Archive build environment
         uses: actions/upload-artifact@v7
         with:
           name: build-env
           path: ~/build-env.tar.zstd
+          retention-days: 1
+          archive: false
+
+      - name: Archive API snapshot
+        uses: actions/upload-artifact@v7
+        with:
+          name: arduino-api
+          path: arduino-api.tar.zstd
           retention-days: 1
           archive: false
 
@@ -281,10 +291,15 @@ jobs:
 
       - uses: actions/checkout@v6
         with:
-          submodules: 'recursive'
           fetch-depth: 0
           persist-credentials: false
           fetch-tags: true
+
+      # Get the API snapshot
+      - uses: actions/download-artifact@v8
+        with:
+          path: .
+          name: arduino-api
 
       # Get all built binaries
       - uses: actions/download-artifact@v8
@@ -295,28 +310,15 @@ jobs:
 
       - name: Package core
         run: |
-          # Verify the API submodule is populated (actions/checkout submodules can fail silently)
-          if [ ! -f cores/arduino/api/ArduinoAPI.h ]; then
-            echo "::warning::API submodule not populated by checkout, initializing manually"
-            git submodule update --init --recursive
-          fi
-          # Hard fail if API is still missing
-          if [ ! -f cores/arduino/api/ArduinoAPI.h ]; then
-            echo "::error::cores/arduino/api/ArduinoAPI.h still missing after submodule init!"
-            ls -la cores/arduino/api/ || echo "api dir does not exist"
-            exit 1
-          fi
-          echo "[DEBUG] API submodule OK: $(ls cores/arduino/api/*.h | wc -l) header files"
-          # Extract board binaries in place
+          # Extract the API snapshot and board binaries in place
+          rm -f cores/arduino/api # remove the symlink, replace with actual files
+          tar --use-compress-program=unzstd -xpf arduino-api.tar.zstd
           for f in binaries-*.tar.zstd ; do
             tar --use-compress-program=unzstd -xpf $f
           done
           cat $(ls boards.local_*.txt | sort) >> boards.local.txt
           # Create the core artifact for this set of boards
           ./extra/package_core.sh ${{ matrix.artifact }} ${CORE_TAG} distrib/${CORE_ARTIFACT}
-          # Verify the tarball contains the API
-          echo "[DEBUG] Checking tarball for api/ArduinoAPI.h:"
-          tar tjf distrib/${CORE_ARTIFACT} | grep ArduinoAPI.h || echo "::error::ArduinoAPI.h NOT in tarball!"
 
       - uses: actions/upload-artifact@v7
         if: ${{ success() || failure() }}
@@ -340,6 +342,7 @@ jobs:
       - uses: geekyeggo/delete-artifact@v6
         with:
           name: |
+            arduino-api
             binaries-*
             build-env.tar.zstd
           failOnError: false
@@ -387,14 +390,6 @@ jobs:
         run: |
           tar xf ${CORE_ARTIFACT} # will create ArduinoCore-zephyr/
           echo "REPORT_FILE=$(echo ${FQBN} | tr ':' '-').json" >> $GITHUB_ENV
-          # Debug: verify API headers are present in extracted core
-          if [ -f ArduinoCore-zephyr/cores/arduino/api/ArduinoAPI.h ]; then
-            echo "[DEBUG] API headers present in extracted core"
-          else
-            echo "::error::ArduinoAPI.h MISSING from extracted core tarball!"
-            echo "[DEBUG] Contents of cores/arduino/:"
-            ls -la ArduinoCore-zephyr/cores/arduino/api/ 2>&1 || echo "api/ dir missing"
-          fi
 
       - name: Install arm-zephyr-eabi 1.0.1 for zephyr_contrib boards
         # zephyr_contrib boards (e.g. kit_pse84_ai) use Zephyr 4.4.0 + SDK 1.0.1.
