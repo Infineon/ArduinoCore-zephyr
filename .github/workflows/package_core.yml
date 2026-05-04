@@ -658,3 +658,76 @@ jobs:
         with:
           name: ArduinoCore-zephyr-${{ env.CORE_TAG }}-jsons
           path: ArduinoCore-*-${{ env.CORE_TAG }}.json
+
+
+  # Publish the PSE84 core package as a GitHub Release.
+  # Runs only on tag pushes to this fork (not on the upstream arduino/ repo).
+  # The release tarball is the CI-built artifact which includes all generated
+  # Zephyr files (llext-edk, includes.txt, cflags.txt, cxxflags.txt, firmwares).
+
+  publish-pse84:
+    name: Publish PSE84 GitHub Release
+    runs-on: ubuntu-latest
+    if: >
+      ${{ github.event_name == 'push' &&
+          github.repository != 'arduino/ArduinoCore-zephyr' &&
+          startsWith(github.ref, 'refs/tags/') }}
+    needs:
+      - build-env
+      - package-core
+      - verify-core
+    permissions:
+      contents: write
+    env:
+      CORE_TAG: ${{ needs.build-env.outputs.CORE_TAG }}
+      CORE_HASH: ${{ needs.build-env.outputs.CORE_HASH }}
+    steps:
+
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+          fetch-tags: true
+
+      # Download the CI-built tarball (contains all Zephyr build artifacts)
+      - uses: actions/download-artifact@v8
+        with:
+          path: release-assets/
+          name: ArduinoCore-zephyr_contrib-${{ env.CORE_HASH }}.tar.bz2
+
+      - name: Generate package index JSON
+        run: |
+          ARTIFACT_FILE="ArduinoCore-zephyr_contrib-${CORE_HASH}.tar.bz2"
+          ARTIFACT_PATH="release-assets/${ARTIFACT_FILE}"
+          SIZE=$(wc -c < "${ARTIFACT_PATH}")
+          SHA256=$(sha256sum "${ARTIFACT_PATH}" | cut -d' ' -f1)
+          TAG="${CORE_TAG}"
+          OWNER="${{ github.repository_owner }}"
+          REPO="${{ github.event.repository.name }}"
+          URL="https://github.com/${OWNER}/${REPO}/releases/download/${TAG}/${ARTIFACT_FILE}"
+
+          python3 - <<EOF
+          import json
+
+          with open("package/package_infineon_pse84_index.template.json") as f:
+              idx = json.load(f)
+
+          p = idx["packages"][0]["platforms"][0]
+          p["version"] = "${TAG}"
+          p["archiveFileName"] = "${ARTIFACT_FILE}"
+          p["url"] = "${URL}"
+          p["checksum"] = "SHA-256:${SHA256}"
+          p["size"] = "${SIZE}"
+
+          with open("release-assets/package_infineon_pse84_index.json", "w") as f:
+              json.dump(idx, f, indent=2)
+          EOF
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.CORE_TAG }}
+          name: ArduinoCore-zephyr-pse84 ${{ env.CORE_TAG }}
+          files: |
+            release-assets/ArduinoCore-zephyr_contrib-${{ env.CORE_HASH }}.tar.bz2
+            release-assets/package_infineon_pse84_index.json
