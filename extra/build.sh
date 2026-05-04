@@ -7,10 +7,13 @@ set -e
 
 source venv/bin/activate
 
-# --- DEBUG: Temporary install of cryptography for imgtool.py test ---
-# Remove this block if not needed!
-echo "[DEBUG] Installing cryptography package for imgtool.py test (remove if unnecessary)"
-pip install cryptography
+# --- WORKAROUND: Install imgtool Python dependencies ---
+# The kit_pse84_ai board CMake unconditionally invokes imgtool.py (from the
+# bootloader/mcuboot west module) as a post-link step to produce zephyr.signed.hex,
+# regardless of CONFIG_BOOTLOADER_MCUBOOT. Without these packages imgtool fails.
+# TODO: Remove this block once the board CMake signing step is disabled upstream,
+#       or the mcuboot module is excluded from the west manifest.
+pip install cryptography cbor2 cbor click intelhex Pillow
 
 ZEPHYR_BASE=$(west topdir)/zephyr
 
@@ -85,28 +88,16 @@ rm -rf ${BUILD_DIR}
 
 
 
-# --- FORCE CONFIG_DYNAMIC_INTERRUPTS=n for Infineon variant ---
-print_config_debug() {
-	if [ -f ${BUILD_DIR}/zephyr/.config ]; then
-		echo "--- DEBUG: merged .config for ${variant} ---"
-		grep -n "DYNAMIC_INTERRUPTS\|IRQ\|ARCH_IRQ" ${BUILD_DIR}/zephyr/.config || true
-		echo "--- full .config (first 240 lines) ---"
-		sed -n '1,240p' ${BUILD_DIR}/zephyr/.config || true
-	else
-		echo "no ${BUILD_DIR}/zephyr/.config present"
-	fi
-}
+# NOTE: CONFIG_DYNAMIC_INTERRUPTS cannot be forced off — it is `select`ed by
+# CONFIG_LLEXT in Zephyr's subsys/llext/Kconfig. Since we build with -t llext-edk,
+# LLEXT is always enabled and DYNAMIC_INTERRUPTS will always be y. Any attempt to
+# set it to n will be silently overridden by Kconfig with a warning.
 
-if [ "${variant}" = "kit_pse84_ai_pse846gps2dbzc4a_m33" ]; then
-	echo "[INFO] Forcing CONFIG_DYNAMIC_INTERRUPTS=n for Infineon variant (${variant}) via -DCONFIG_DYNAMIC_INTERRUPTS=n"
-	echo "[DEBUG] Full west build command: west build -d ${BUILD_DIR} -b ${target} loader -t llext-edk ${args} -- -DCONFIG_DYNAMIC_INTERRUPTS=n -DCONFIG_BOOTLOADER_MCUBOOT=n"
-	west build -d ${BUILD_DIR} -b ${target} loader -t llext-edk ${args} -- -DCONFIG_DYNAMIC_INTERRUPTS=n -DCONFIG_BOOTLOADER_MCUBOOT=n || { print_config_debug; exit 1; }
-else
-	echo "[DEBUG] Full west build command: west build -d ${BUILD_DIR} -b ${target} loader -t llext-edk ${args} -- -DCONFIG_DYNAMIC_INTERRUPTS=n -DCONFIG_BOOTLOADER_MCUBOOT=n"
-	west build -d ${BUILD_DIR} -b ${target} loader -t llext-edk ${args} -- -DCONFIG_DYNAMIC_INTERRUPTS=n -DCONFIG_BOOTLOADER_MCUBOOT=n || { print_config_debug; exit 1; }
-fi
-
-print_config_debug
+# ZEPHYR_EXTRA_MODULES tells Zephyr CMake where to find ArduinoCore-zephyr as a module.
+# This matches the working local build script which passes -DZEPHYR_EXTRA_MODULES=<arduino_core_root>.
+ARDUINO_CORE_DIR=$(pwd)
+echo "[INFO] west build command: west build -d ${BUILD_DIR} -b ${target} loader -t llext-edk ${args} -- -DZEPHYR_EXTRA_MODULES=${ARDUINO_CORE_DIR}"
+west build -d ${BUILD_DIR} -b ${target} loader -t llext-edk ${args} -- -DZEPHYR_EXTRA_MODULES=${ARDUINO_CORE_DIR}
 
 # Extract the generated EDK tarball and copy it to the variant directory
 mkdir -p ${VARIANT_DIR} firmwares
