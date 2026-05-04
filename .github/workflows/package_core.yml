@@ -300,7 +300,7 @@ jobs:
       - name: Package core
         run: |
           # Extract the API snapshot and board binaries in place
-          rm -f cores/arduino/api # remove broken symlink
+          rm -rf cores/arduino/api # remove submodule dir (or broken symlink) before extracting snapshot
           tar --use-compress-program=unzstd -xpf arduino-api.tar.zstd
           for f in binaries-*.tar.zstd ; do
             tar --use-compress-program=unzstd -xpf $f
