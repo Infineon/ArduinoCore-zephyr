@@ -174,16 +174,16 @@ tools.openocd.cmd=bin/openocd
 tools.openocd.cmd.windows=bin/openocd.exe
 tools.openocd.upload.params.verbose=-d2
 tools.openocd.upload.params.quiet=-d0
-tools.openocd.upload.pattern="{path}/{cmd}" {upload.verbose} -s "{path}/scripts/" -s "{runtime.platform.path}/variants/{build.variant}/" -f interface/kitprog3.cfg -f target/infineon/pse84xgxs2.cfg -c "telnet_port disabled; init; reset init; halt; adapter speed 10000; flash write_image erase {build.path}/{build.project_name}.{upload.extension} {upload.address} bin; reset run; shutdown"
+tools.openocd.upload.pattern="{path}/{cmd}" {upload.verbose} -s "{path}/scripts/" -s "{runtime.platform.path}/variants/{build.variant}/" -f openocd.cfg -c "telnet_port disabled; init; reset init; halt; adapter speed 10000; flash write_image erase {build.path}/{build.project_name}.{upload.extension} {upload.address} bin; reset run; shutdown"
 tools.openocd.program.params.verbose=-d2
 tools.openocd.program.params.quiet=-d0
-tools.openocd.program.pattern="{path}/{cmd}" {program.verbose} -s "{path}/scripts/" -s "{runtime.platform.path}/variants/{build.variant}/" -f interface/kitprog3.cfg -f target/infineon/pse84xgxs2.cfg -c "telnet_port disabled; init; reset init; halt; adapter speed 10000; flash write_image erase {build.path}/{build.project_name}.{upload.extension} {upload.address} bin; reset run; shutdown"
+tools.openocd.program.pattern="{path}/{cmd}" {program.verbose} -s "{path}/scripts/" -s "{runtime.platform.path}/variants/{build.variant}/" -f openocd.cfg -c "telnet_port disabled; init; reset init; halt; adapter speed 10000; flash write_image erase {build.path}/{build.project_name}.{upload.extension} {upload.address} bin; reset run; shutdown"
 tools.openocd.erase.params.verbose=-d2
 tools.openocd.erase.params.quiet=-d0
 tools.openocd.erase.pattern=
 tools.openocd.bootloader.params.verbose=-d2
 tools.openocd.bootloader.params.quiet=-d0
-tools.openocd.bootloader.pattern="{path}/{cmd}" {bootloader.verbose} -s "{path}/scripts/" -s "{runtime.platform.path}/variants/{build.variant}/" -f interface/kitprog3.cfg -f target/infineon/pse84xgxs2.cfg -c "program {runtime.platform.path}/firmwares/{bootloader.file} reset exit"
+tools.openocd.bootloader.pattern="{path}/{cmd}" {bootloader.verbose} -s "{path}/scripts/" -s "{runtime.platform.path}/variants/{build.variant}/" -f openocd.cfg -c "program {runtime.platform.path}/firmwares/{bootloader.file} reset exit"
 
 #
 # Debugger
