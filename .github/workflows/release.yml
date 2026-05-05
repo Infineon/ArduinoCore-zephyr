@@ -16,6 +16,7 @@ on:
 permissions:
   contents: write
   actions: read
+  checks: read
 
 jobs:
   arduino-devops:
@@ -58,52 +59,45 @@ jobs:
 
       - name: Find successful package_core run for tag commit
         run: |
-          # Try to find the package_core.yml workflow by listing all workflows first
-          WORKFLOW_ID=$(gh api "repos/${GH_REPO}/actions/workflows" --paginate \
-            --jq '.workflows[] | select(.name == "Package, test and upload core") | .id' | head -n1)
+          RUN_ID=""
 
-          if [ -z "${WORKFLOW_ID}" ]; then
-            echo "Could not find 'Package, test and upload core' workflow" >&2
-            exit 1
-          fi
+          for CHECK_NAME in "verify-core summary" "Prepare build environment summary" "package-core summary"; do
+            DETAILS_URL=$(gh api "repos/${GH_REPO}/commits/${TAG_SHA}/check-runs" \
+              -f per_page=100 \
+              --jq ".check_runs[] | select(.name == \"${CHECK_NAME}\" and .conclusion == \"success\") | .details_url" | head -n1 || true)
 
-          # Query with pagination to find the run
-          RUN_ID=$(gh api "repos/${GH_REPO}/actions/workflows/${WORKFLOW_ID}/runs" --paginate \
-            -f head_sha="${TAG_SHA}" \
-            -f status=completed \
-            -f conclusion=success \
-            --jq '.workflow_runs[0].id')
+            if [ -n "${DETAILS_URL}" ]; then
+              RUN_ID=$(echo "${DETAILS_URL}" | sed -nE 's#.*actions/runs/([0-9]+).*#\1#p' | head -n1)
+            fi
+
+            if [ -n "${RUN_ID}" ]; then
+              break
+            fi
+          done
 
           if [ -z "${RUN_ID}" ] || [ "${RUN_ID}" = "null" ]; then
-            echo "No successful 'Package, test and upload core' run found for ${TAG_SHA}" >&2
-            echo "Available runs for this commit:"
-            gh api "repos/${GH_REPO}/actions/workflows/${WORKFLOW_ID}/runs" --paginate \
-              -f head_sha="${TAG_SHA}" \
-              --jq '.workflow_runs[] | "\(.id) - status=\(.status) conclusion=\(.conclusion)"' || true
+            echo "No successful package_core check-run found for ${TAG_SHA}" >&2
+            echo "Successful checks available for this commit:" >&2
+            gh api "repos/${GH_REPO}/commits/${TAG_SHA}/check-runs" \
+              -f per_page=100 \
+              --jq '.check_runs[] | select(.conclusion == "success") | .name' | sort -u >&2 || true
             exit 1
           fi
 
           echo "RUN_ID=${RUN_ID}" >> "$GITHUB_ENV"
 
       - name: Download zephyr_contrib artifact from package_core run
+        uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: ${{ env.RUN_ID }}
+          pattern: ArduinoCore-zephyr_contrib-*
+          path: release-assets
+          merge-multiple: true
+
+      - name: Normalize artifact filename for release tag
         run: |
-          mkdir -p release-assets
-
-          ARTIFACT_INFO=$(gh api \
-            "repos/${GH_REPO}/actions/runs/${RUN_ID}/artifacts" \
-            --jq '.artifacts[] | select((.name | startswith("ArduinoCore-zephyr_contrib-")) and (.expired == false)) | "\(.id) \(.name)"' | head -n1)
-
-          if [ -z "${ARTIFACT_INFO}" ]; then
-            echo "No ArduinoCore-zephyr_contrib artifact found in run ${RUN_ID}" >&2
-            exit 1
-          fi
-
-          ARTIFACT_ID=$(echo "${ARTIFACT_INFO}" | awk '{print $1}')
-          ARTIFACT_NAME=$(echo "${ARTIFACT_INFO}" | awk '{print $2}')
-
-          gh api "repos/${GH_REPO}/actions/artifacts/${ARTIFACT_ID}/zip" > release-assets/artifact.zip
-          unzip -q release-assets/artifact.zip -d release-assets/
-
           TAR_FILE=$(ls release-assets/ArduinoCore-zephyr_contrib-*.tar.bz2 | head -n1)
           if [ -z "${TAR_FILE}" ]; then
             echo "Downloaded artifact does not contain expected tarball" >&2
