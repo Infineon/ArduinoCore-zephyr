@@ -1,9 +1,6 @@
 name: Release
 
 on:
-  push:
-    tags:
-      - '[0-9]+.[0-9]+.[0-9]+**'
   workflow_dispatch:
     inputs:
       version:
@@ -16,9 +13,124 @@ on:
           - minor
           - major
 
+permissions:
+  contents: write
+  actions: read
+
 jobs:
   arduino-devops:
     uses: Infineon/arduino-devops/.github/workflows/release.yml@latest
     with:
       version: ${{ inputs.version }}
     secrets: inherit
+
+  publish-pse84:
+    name: Publish PSE84 release assets
+    runs-on: ubuntu-latest
+    # Runs in the same workflow_dispatch invocation, after arduino-devops creates the tag.
+    needs:
+      - arduino-devops
+    if: ${{ needs.arduino-devops.result == 'success' }}
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+          fetch-tags: true
+
+      - name: Resolve release tag (just created by arduino-devops)
+        run: |
+          git fetch --tags
+          TAG=$(git tag --list '[0-9]*.[0-9]*.[0-9]*' --sort=-v:refname | head -n1)
+
+          if [ -z "${TAG}" ]; then
+            echo "Unable to resolve release tag" >&2
+            exit 1
+          fi
+
+          TAG_SHA=$(git rev-list -n 1 "${TAG}")
+          echo "TAG=${TAG}" >> "$GITHUB_ENV"
+          echo "TAG_SHA=${TAG_SHA}" >> "$GITHUB_ENV"
+
+      - name: Find successful package_core run for tag commit
+        run: |
+          RUN_ID=$(gh api \
+            "repos/${GH_REPO}/actions/workflows/package_core.yml/runs" \
+            -f head_sha="${TAG_SHA}" \
+            -f status=completed \
+            -f conclusion=success \
+            -f per_page=20 \
+            --jq '.workflow_runs[0].id')
+
+          if [ -z "${RUN_ID}" ] || [ "${RUN_ID}" = "null" ]; then
+            echo "No successful package_core.yml run found for ${TAG_SHA}" >&2
+            exit 1
+          fi
+
+          echo "RUN_ID=${RUN_ID}" >> "$GITHUB_ENV"
+
+      - name: Download zephyr_contrib artifact from package_core run
+        run: |
+          mkdir -p release-assets
+
+          ARTIFACT_INFO=$(gh api \
+            "repos/${GH_REPO}/actions/runs/${RUN_ID}/artifacts" \
+            --jq '.artifacts[] | select((.name | startswith("ArduinoCore-zephyr_contrib-")) and (.expired == false)) | "\(.id) \(.name)"' | head -n1)
+
+          if [ -z "${ARTIFACT_INFO}" ]; then
+            echo "No ArduinoCore-zephyr_contrib artifact found in run ${RUN_ID}" >&2
+            exit 1
+          fi
+
+          ARTIFACT_ID=$(echo "${ARTIFACT_INFO}" | awk '{print $1}')
+          ARTIFACT_NAME=$(echo "${ARTIFACT_INFO}" | awk '{print $2}')
+
+          gh api "repos/${GH_REPO}/actions/artifacts/${ARTIFACT_ID}/zip" > release-assets/artifact.zip
+          unzip -q release-assets/artifact.zip -d release-assets/
+
+          TAR_FILE=$(ls release-assets/ArduinoCore-zephyr_contrib-*.tar.bz2 | head -n1)
+          if [ -z "${TAR_FILE}" ]; then
+            echo "Downloaded artifact does not contain expected tarball" >&2
+            exit 1
+          fi
+
+          TAR_BASENAME=$(basename "${TAR_FILE}")
+          echo "TAR_BASENAME=${TAR_BASENAME}" >> "$GITHUB_ENV"
+
+      - name: Generate package index JSON
+        run: |
+          ARTIFACT_PATH="release-assets/${TAR_BASENAME}"
+          SIZE=$(wc -c < "${ARTIFACT_PATH}")
+          SHA256=$(sha256sum "${ARTIFACT_PATH}" | cut -d' ' -f1)
+          URL="https://github.com/${GH_REPO}/releases/download/${TAG}/${TAR_BASENAME}"
+
+          python3 - <<EOF
+          import json
+
+          with open("package/package_infineon_pse84_index.template.json") as f:
+              idx = json.load(f)
+
+          p = idx["packages"][0]["platforms"][0]
+          p["version"] = "${TAG}"
+          p["archiveFileName"] = "${TAR_BASENAME}"
+          p["url"] = "${URL}"
+          p["checksum"] = "SHA-256:${SHA256}"
+          p["size"] = "${SIZE}"
+
+          with open("release-assets/package_infineon_pse84_index.json", "w") as f:
+              json.dump(idx, f, indent=2)
+          EOF
+
+      - name: Create or update GitHub Release assets
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.TAG }}
+          name: ArduinoCore-zephyr-pse84 ${{ env.TAG }}
+          overwrite_files: true
+          files: |
+            release-assets/${{ env.TAR_BASENAME }}
+            release-assets/package_infineon_pse84_index.json
