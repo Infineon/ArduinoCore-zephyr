@@ -12,24 +12,30 @@ on:
     tags-ignore:
       - 'tools/**' # do not run on tags created for tool releases
   pull_request:
-  release:
-    types:
-      - published
   workflow_dispatch:
     inputs:
       ref:
         description: 'Git ref to build (example: refs/tags/0.1.10)'
         required: false
         default: ''
+      release_version:
+        description: 'Release bump type (workflow_dispatch only)'
+        required: false
+        default: patch
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}-${{ github.actor }}
   cancel-in-progress: ${{ github.event_name != 'push' || github.repository != 'arduino/ArduinoCore-zephyr' }}
 
 env:
-  # use PR head SHA for pull requests, release tag for release events,
-  # manual input for workflow_dispatch, otherwise the event ref
-  HEAD_REF: ${{ github.event.pull_request.head.sha || github.event.release.tag_name || github.event.inputs.ref || github.ref }}
+  # use PR head SHA for pull requests, manual input for workflow_dispatch,
+  # otherwise the event ref
+  HEAD_REF: ${{ github.event.pull_request.head.sha || github.event.inputs.ref || github.ref }}
 
 jobs:
 
