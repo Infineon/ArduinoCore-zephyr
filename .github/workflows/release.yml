@@ -1,17 +1,7 @@
-name: Release
+name: Release (deprecated)
 
 on:
   workflow_dispatch:
-    inputs:
-      version:
-        description: 'Release version'
-        required: true
-        default: ''
-        type: choice
-        options:
-          - patch
-          - minor
-          - major
 
 permissions:
   contents: write
@@ -19,134 +9,11 @@ permissions:
   checks: read
 
 jobs:
-  arduino-devops:
-    uses: Infineon/arduino-devops/.github/workflows/release.yml@latest
-    with:
-      version: ${{ inputs.version }}
-    secrets: inherit
-
-  publish-pse84:
-    name: Publish PSE84 release assets
+  deprecated:
+    name: Deprecated workflow notice
     runs-on: ubuntu-latest
-    # Runs in the same workflow_dispatch invocation, after arduino-devops creates the tag.
-    needs:
-      - arduino-devops
-    if: ${{ needs.arduino-devops.result == 'success' }}
-    env:
-      GH_TOKEN: ${{ github.token }}
-      GH_REPO: ${{ github.repository }}
     steps:
-
-      - uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
-          persist-credentials: false
-          fetch-tags: true
-
-      - name: Resolve release tag (just created by arduino-devops)
+      - name: Explain deprecation
         run: |
-          git fetch --tags
-          TAG=$(git tag --list '[0-9]*.[0-9]*.[0-9]*' --sort=-v:refname | head -n1)
-
-          if [ -z "${TAG}" ]; then
-            echo "Unable to resolve release tag" >&2
-            exit 1
-          fi
-
-          TAG_SHA=$(git rev-list -n 1 "${TAG}")
-          echo "TAG=${TAG}" >> "$GITHUB_ENV"
-          echo "TAG_SHA=${TAG_SHA}" >> "$GITHUB_ENV"
-
-      - name: Find successful package_core run for tag commit
-        run: |
-          RUN_ID=""
-
-          for CHECK_NAME in "verify-core summary" "Prepare build environment summary" "package-core summary"; do
-            DETAILS_URL=$(gh api "repos/${GH_REPO}/commits/${TAG_SHA}/check-runs" \
-              -f per_page=100 \
-              --jq ".check_runs[] | select(.name == \"${CHECK_NAME}\" and .conclusion == \"success\") | .details_url" | head -n1 || true)
-
-            if [ -n "${DETAILS_URL}" ]; then
-              RUN_ID=$(echo "${DETAILS_URL}" | sed -nE 's#.*actions/runs/([0-9]+).*#\1#p' | head -n1)
-            fi
-
-            if [ -n "${RUN_ID}" ]; then
-              break
-            fi
-          done
-
-          if [ -z "${RUN_ID}" ] || [ "${RUN_ID}" = "null" ]; then
-            echo "No successful package_core check-run found for ${TAG_SHA}" >&2
-            echo "Successful checks available for this commit:" >&2
-            gh api "repos/${GH_REPO}/commits/${TAG_SHA}/check-runs" \
-              -f per_page=100 \
-              --jq '.check_runs[] | select(.conclusion == "success") | .name' | sort -u >&2 || true
-            exit 1
-          fi
-
-          echo "RUN_ID=${RUN_ID}" >> "$GITHUB_ENV"
-
-      - name: Download zephyr_contrib artifact from package_core run
-        uses: actions/download-artifact@v4
-        with:
-          github-token: ${{ github.token }}
-          repository: ${{ github.repository }}
-          run-id: ${{ env.RUN_ID }}
-          pattern: ArduinoCore-zephyr_contrib-*
-          path: release-assets
-          merge-multiple: true
-
-      - name: Normalize artifact filename for release tag
-        run: |
-          TAR_FILE=$(ls release-assets/ArduinoCore-zephyr_contrib-*.tar.bz2 | head -n1)
-          if [ -z "${TAR_FILE}" ]; then
-            echo "Downloaded artifact does not contain expected tarball" >&2
-            exit 1
-          fi
-
-          # Rename artifact to use the correct release tag version
-          # CI run has versioning from when it ran (before tag was created), 
-          # but we want the release package to be named with the actual release tag
-          OLD_BASENAME=$(basename "${TAR_FILE}")
-          NEW_BASENAME="ArduinoCore-zephyr_contrib-${TAG}.tar.bz2"
-          
-          if [ "${OLD_BASENAME}" != "${NEW_BASENAME}" ]; then
-            mv "${TAR_FILE}" "release-assets/${NEW_BASENAME}"
-            echo "Renamed ${OLD_BASENAME} → ${NEW_BASENAME}"
-          fi
-          
-          echo "TAR_BASENAME=${NEW_BASENAME}" >> "$GITHUB_ENV"
-
-      - name: Generate package index JSON
-        run: |
-          ARTIFACT_PATH="release-assets/${TAR_BASENAME}"
-          SIZE=$(wc -c < "${ARTIFACT_PATH}")
-          SHA256=$(sha256sum "${ARTIFACT_PATH}" | cut -d' ' -f1)
-          URL="https://github.com/${GH_REPO}/releases/download/${TAG}/${TAR_BASENAME}"
-
-          python3 - <<EOF
-          import json
-
-          with open("package/package_infineon_pse84_index.template.json") as f:
-              idx = json.load(f)
-
-          p = idx["packages"][0]["platforms"][0]
-          p["version"] = "${TAG}"
-          p["archiveFileName"] = "${TAR_BASENAME}"
-          p["url"] = "${URL}"
-          p["checksum"] = "SHA-256:${SHA256}"
-          p["size"] = "${SIZE}"
-
-          with open("release-assets/package_infineon_pse84_index.json", "w") as f:
-              json.dump(idx, f, indent=2)
-          EOF
-
-      - name: Create or update GitHub Release assets
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{ env.TAG }}
-          name: ArduinoCore-zephyr-pse84 ${{ env.TAG }}
-          overwrite_files: true
-          files: |
-            release-assets/${{ env.TAR_BASENAME }}
-            release-assets/package_infineon_pse84_index.json
+          echo "This workflow is deprecated."
+          echo "Use package_core.yml, which now performs version bump, tagging, and release publish at the end of a successful run."
