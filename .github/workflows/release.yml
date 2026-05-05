@@ -58,16 +58,28 @@ jobs:
 
       - name: Find successful package_core run for tag commit
         run: |
-          RUN_ID=$(gh api \
-            "repos/${GH_REPO}/actions/workflows/package_core.yml/runs" \
+          # Try to find the package_core.yml workflow by listing all workflows first
+          WORKFLOW_ID=$(gh api "repos/${GH_REPO}/actions/workflows" --paginate \
+            --jq '.workflows[] | select(.name == "Package, test and upload core") | .id' | head -n1)
+
+          if [ -z "${WORKFLOW_ID}" ]; then
+            echo "Could not find 'Package, test and upload core' workflow" >&2
+            exit 1
+          fi
+
+          # Query with pagination to find the run
+          RUN_ID=$(gh api "repos/${GH_REPO}/actions/workflows/${WORKFLOW_ID}/runs" --paginate \
             -f head_sha="${TAG_SHA}" \
             -f status=completed \
             -f conclusion=success \
-            -f per_page=20 \
             --jq '.workflow_runs[0].id')
 
           if [ -z "${RUN_ID}" ] || [ "${RUN_ID}" = "null" ]; then
-            echo "No successful package_core.yml run found for ${TAG_SHA}" >&2
+            echo "No successful 'Package, test and upload core' run found for ${TAG_SHA}" >&2
+            echo "Available runs for this commit:"
+            gh api "repos/${GH_REPO}/actions/workflows/${WORKFLOW_ID}/runs" --paginate \
+              -f head_sha="${TAG_SHA}" \
+              --jq '.workflow_runs[] | "\(.id) - status=\(.status) conclusion=\(.conclusion)"' || true
             exit 1
           fi
 
@@ -98,8 +110,18 @@ jobs:
             exit 1
           fi
 
-          TAR_BASENAME=$(basename "${TAR_FILE}")
-          echo "TAR_BASENAME=${TAR_BASENAME}" >> "$GITHUB_ENV"
+          # Rename artifact to use the correct release tag version
+          # CI run has versioning from when it ran (before tag was created), 
+          # but we want the release package to be named with the actual release tag
+          OLD_BASENAME=$(basename "${TAR_FILE}")
+          NEW_BASENAME="ArduinoCore-zephyr_contrib-${TAG}.tar.bz2"
+          
+          if [ "${OLD_BASENAME}" != "${NEW_BASENAME}" ]; then
+            mv "${TAR_FILE}" "release-assets/${NEW_BASENAME}"
+            echo "Renamed ${OLD_BASENAME} → ${NEW_BASENAME}"
+          fi
+          
+          echo "TAR_BASENAME=${NEW_BASENAME}" >> "$GITHUB_ENV"
 
       - name: Generate package index JSON
         run: |
