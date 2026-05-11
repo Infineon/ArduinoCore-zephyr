@@ -51,5 +51,5 @@ kit_pse84_ai.upload.maximum_data_size=135168
 kit_pse84_ai.bootloader.tool=openocd
 kit_pse84_ai.bootloader.tool.default=openocd
 kit_pse84_ai.bootloader.file=zephyr-{build.variant}.hex
-kit_pse84_ai.tools.openocd.bootloader.pattern.windows=cmd /C cd /D "{runtime.platform.path}/firmwares" && "{path}/{cmd}" {bootloader.verbose} -s "{path}/scripts/" -s "{runtime.platform.path}/variants/{build.variant}/" -f "{runtime.platform.path}/variants/{build.variant}/openocd.cfg" -c "set bootloader_file [list {bootloader.file}]; program $bootloader_file reset exit"
+kit_pse84_ai.tools.openocd.bootloader.pattern.windows=cmd /C cd /D "{runtime.platform.path}/firmwares" && "{path}/{cmd}" {bootloader.verbose} -s "{path}/scripts/" -s "{runtime.platform.path}/variants/{build.variant}/" -f "{runtime.platform.path}/variants/{build.variant}/openocd.cfg" -c "set bootloader_file [list {bootloader.file}]; telnet_port disabled; init; reset init; halt; adapter speed 10000; program $bootloader_file verify; reset run; shutdown"
 kit_pse84_ai.bootloader.target=pse84
