@@ -35,6 +35,7 @@ log_msg "group" "Initializing Zephyr workspace and modules: $HAL_FILTER"
 west init -l .
 west config manifest.project-filter -- "$HAL_FILTER"
 west update "$@"
+bash ./extra/apply_zephyr_patches.sh
 west zephyr-export
 pip install -r ../zephyr/scripts/requirements-base.txt
 log_msg "endgroup"
