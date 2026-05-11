@@ -54,6 +54,10 @@ jobs:
         run: |
           echo EXTRA_ZEPHYR_MODULES="$(pwd)/$MODULE_PATH" >> $GITHUB_ENV
 
+      - name: Apply Zephyr patches
+        run: |
+          bash $MODULE_PATH/extra/apply_zephyr_patches.sh
+
       - name: Build blinky
         run: |
           west build -p -b kit_pse84_ai/pse846gps2dbzc4a/m33 $MODULE_PATH/samples/blinky_arduino

@@ -17,6 +17,10 @@ pip install cryptography cbor2 cbor click intelhex Pillow
 
 ZEPHYR_BASE=$(west topdir)/zephyr
 
+# Ensure Zephyr patch set is applied even for incremental builds where
+# bootstrap.sh was not re-run.
+bash ./extra/apply_zephyr_patches.sh
+
 if [ x$ZEPHYR_SDK_INSTALL_DIR == x"" ]; then
 	SDK_PATH=$(west sdk list | grep path | tail -n 1 | cut -d ':' -f 2 | tr -d ' ')
 	if [ x$SDK_PATH == x ]; then
