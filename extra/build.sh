@@ -117,6 +117,10 @@ for ext in elf bin hex; do
 	if [ "$ext" = "hex" ] && [ -f ${BUILD_DIR}/zephyr/zephyr.signed.hex ]; then
 		cp ${BUILD_DIR}/zephyr/zephyr.signed.hex firmwares/zephyr-$variant.$ext
 	elif [ "$ext" = "hex" ] && [ -f ${BUILD_DIR}/zephyr/zephyr.hex ]; then
+		if [ "$variant" = "kit_pse84_ai_pse846gps2dbzc4a_m33" ]; then
+			echo "[ERROR] Missing ${BUILD_DIR}/zephyr/zephyr.signed.hex for ${variant}; refusing to package unsigned bootloader"
+			exit 1
+		fi
 		echo "[WARN] Missing ${BUILD_DIR}/zephyr/zephyr.signed.hex for ${variant}; packaging unsigned zephyr.hex instead"
 		cp ${BUILD_DIR}/zephyr/zephyr.hex firmwares/zephyr-$variant.$ext
 	elif [ -f ${BUILD_DIR}/zephyr/zephyr.$ext ]; then
