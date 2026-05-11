@@ -113,10 +113,15 @@ c_comment='\s*\/\*.*?\*\/' # match C-style comments and any preceding space
 perl -i -pe "s/${c_comment}//gs unless /${line_preproc_ok}/ || (/${line_comment_only}/ && !/${line_continuation}/)" $(find ${VARIANT_DIR}/llext-edk/include/ -type f)
 
 for ext in elf bin hex; do
-    rm -f firmwares/zephyr-$variant.$ext
-    if [ -f ${BUILD_DIR}/zephyr/zephyr.$ext ]; then
-        cp ${BUILD_DIR}/zephyr/zephyr.$ext firmwares/zephyr-$variant.$ext
-    fi
+	rm -f firmwares/zephyr-$variant.$ext
+	if [ "$ext" = "hex" ] && [ -f ${BUILD_DIR}/zephyr/zephyr.signed.hex ]; then
+		cp ${BUILD_DIR}/zephyr/zephyr.signed.hex firmwares/zephyr-$variant.$ext
+	elif [ "$ext" = "hex" ] && [ -f ${BUILD_DIR}/zephyr/zephyr.hex ]; then
+		echo "[WARN] Missing ${BUILD_DIR}/zephyr/zephyr.signed.hex for ${variant}; packaging unsigned zephyr.hex instead"
+		cp ${BUILD_DIR}/zephyr/zephyr.hex firmwares/zephyr-$variant.$ext
+	elif [ -f ${BUILD_DIR}/zephyr/zephyr.$ext ]; then
+		cp ${BUILD_DIR}/zephyr/zephyr.$ext firmwares/zephyr-$variant.$ext
+	fi
 done
 cp ${BUILD_DIR}/zephyr/zephyr.dts firmwares/zephyr-$variant.dts
 cp ${BUILD_DIR}/zephyr/.config firmwares/zephyr-$variant.config
