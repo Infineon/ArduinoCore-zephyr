@@ -18,7 +18,11 @@ if ! command -v west >/dev/null 2>&1; then
 	exit 1
 fi
 
-ZEPHYR_BASE="$(west topdir)/zephyr"
+ZEPHYR_BASE="$(west list -f '{abspath}' zephyr 2>/dev/null || true)"
+if [ -z "$ZEPHYR_BASE" ]; then
+	echo "[ERROR] Unable to locate Zephyr module with 'west list zephyr'"
+	exit 1
+fi
 
 if [ ! -d "$ZEPHYR_BASE/.git" ]; then
 	echo "[ERROR] Zephyr repository not found at '$ZEPHYR_BASE'"
