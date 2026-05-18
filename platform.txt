@@ -165,7 +165,7 @@ pluggable_monitor.required.serial=builtin:serial-monitor
 # Uploader tools
 # --------------
 #
-# OpenOCD (Infineon, for PSoC Edge and other Infineon boards requiring KitProg3)
+# OpenOCD (Infineon, for PSOC Edge and other Infineon boards requiring KitProg3)
 # Distributed as a separate tool package: openocd
 # Scripts and interface/target configs are inside the tool package.
 # qspi_config.cfg must be present in the variant directory (copied there by setup).

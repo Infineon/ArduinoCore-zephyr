@@ -7,7 +7,7 @@
       "email": "maker@infineon.com",
       "platforms": [
         {
-          "name": "Infineon PSoC Edge Boards",
+          "name": "Infineon PSOC Edge Boards",
           "architecture": "zephyr_pse84",
           "version": "",
           "category": "Contributed",
@@ -20,7 +20,7 @@
           },
           "boards": [
             {
-              "name": "Infineon KIT-PSE84-AI (PSoC Edge E84)"
+              "name": "Infineon KIT-PSE84-AI (PSOC Edge E84)"
             }
           ],
           "toolsDependencies": [

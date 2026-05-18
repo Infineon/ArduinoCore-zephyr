@@ -3,7 +3,7 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  *
- * Devicetree overlay for KIT-PSE84-AI (PSoC Edge E84, CM33 secure)
+ * Devicetree overlay for KIT-PSE84-AI (PSOC Edge E84, CM33 secure)
  *
  * Hardware mapping derived from:
  *   - Infineon TARGET_KIT_PSE84_AI BSP (design.modus)

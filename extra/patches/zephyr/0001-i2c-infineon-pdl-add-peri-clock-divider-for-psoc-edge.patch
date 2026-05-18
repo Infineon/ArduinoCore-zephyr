@@ -82,10 +82,10 @@ index 54efccdc1a8..997fba69eea 100644
 +}
 +
 +/*
-+ * Set the peri clock divider for I2C on PSoC Edge so that the SCB input clock
++ * Set the peri clock divider for I2C on PSOC Edge so that the SCB input clock
 + * falls in the range required by Cy_SCB_I2C_SetDataRate().
 + *
-+ * Target peri frequencies (from the PDL API Reference Guide for PSoC Edge):
++ * Target peri frequencies (from the PDL API Reference Guide for PSOC Edge):
 + *   Controller 100 kHz:  [1.55, 3.2]  MHz -> 2 MHz
 + *   Controller 400 kHz:  [7.82, 10]   MHz -> 8.5 MHz
 + *   Controller 1 MHz:    [14.32, 25.8] MHz -> 20 MHz
