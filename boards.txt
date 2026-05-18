@@ -4,7 +4,7 @@ menu.wait_linux_boot=Startup mode
 
 ##########################################################################################
 
-kit_pse84_ai.name=Infineon KIT-PSE84-AI (PSoC Edge E84)
+kit_pse84_ai.name=Infineon KIT-PSE84-AI (PSOC Edge E84)
 kit_pse84_ai.build.core=arduino
 kit_pse84_ai.build.crossprefix=arm-zephyr-eabi-
 kit_pse84_ai.build.compiler_path={runtime.tools.arm-zephyr-eabi-1.0.1.path}/bin/

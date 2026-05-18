@@ -3,7 +3,7 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  *
- * Arduino variant header for KIT-PSE84-AI (PSoC Edge E84, CM33 secure)
+ * Arduino variant header for KIT-PSE84-AI (PSOC Edge E84, CM33 secure)
  *
  * Pin numbers below correspond to the digital-pin-gpios indices
  * defined in the devicetree overlay:
