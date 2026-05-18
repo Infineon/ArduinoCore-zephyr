@@ -49,6 +49,14 @@
 	status = "okay";
 };
 
+&gpio_prt9 {
+	status = "okay";
+};
+
+&gpio_prt17 {
+	status = "okay";
+};
+
 &gpio_prt21 {
 	status = "okay";
 };
@@ -69,7 +77,28 @@ i2c0: &scb0 {
 	pinctrl-names = "default";
 };
 
+
+
+i2c1: &scb5 {
+	compatible = "infineon,i2c";
+	status = "okay";
+	#address-cells = <1>;
+	#size-cells = <0>;
+	clock-frequency = <100000>;
+
+	clocks = <&peri0_group1_16bit_3>;
+
+	pinctrl-0 = <&p17_0_scb5_i2c_scl &p17_1_scb5_i2c_sda>;
+	pinctrl-names = "default";
+};
+
+
 &peri0_group1_16bit_1 {
+	status = "okay";
+	clock-div = <1>;
+};
+
+&peri0_group1_16bit_3 {
 	status = "okay";
 	clock-div = <1>;
 };
@@ -81,6 +110,39 @@ i2c0: &scb0 {
 
 &p8_1_scb0_i2c_sda {
 	drive-open-drain;
+	input-enable;
+};
+
+&p17_0_scb5_i2c_scl {
+	drive-open-drain;
+	input-enable;
+};
+
+&p17_1_scb5_i2c_sda {
+	drive-open-drain;
+	input-enable;
+};
+
+/* ------------------------------------------------------------------ */
+/* UART1 bus - SCB1 on P9_2(TX) / P9_3(RX)                          */
+/* Exposed as Arduino Serial1 via zephyr,user.serials                */
+/* ------------------------------------------------------------------ */
+uart1: &scb1 {
+	compatible = "infineon,uart";
+	status = "okay";
+	current-speed = <115200>;
+
+	clocks = <&peri0_group1_16bit_0>;
+
+	pinctrl-0 = <&p9_2_scb1_uart_tx &p9_3_scb1_uart_rx>;
+	pinctrl-names = "default";
+};
+
+&p9_2_scb1_uart_tx {
+	drive-push-pull;
+};
+
+&p9_3_scb1_uart_rx {
 	input-enable;
 };
 
@@ -138,6 +200,19 @@ spi0: &scb3 {
 /*   D9  = P21_5  (SPI_MOSI)                                         */
 /*   D10 = P21_4  (SPI_MISO)                                         */
 /*   D11 = P21_7  (SPI_CS)                                           */
+/*   D20 = P17_0  (I2C1_SCL)                                         */
+/*   D21 = P17_1  (I2C1_SDA)                                         */
+/*   D22 = P17_2                                                      */
+/*   D23 = P17_3                                                      */
+/*   D24 = P17_4                                                      */
+/*   D25 = P17_5                                                      */
+/*   D26 = P17_7                                                      */
+/*   D27 = P11_1  (documented project policy: input-only usage)      */
+/*   D28 = P9_0   (SERIAL_INT0 / alternate serial signal 0)           */
+/*   D29 = P9_1   (SERIAL_INT1 / alternate serial signal 1)           */
+/*   D30 = P9_2   (SERIAL_INT2 / alternate serial signal 2)           */
+/*   D31 = P9_3   (SERIAL_INT3 / alternate serial signal 3)           */
+/*                                                                    */
 /* ------------------------------------------------------------------ */
 / {
 	zephyr,user {
@@ -152,15 +227,35 @@ spi0: &scb3 {
 				    <&gpio_prt21 6 0>,  /* D8  - SPI_CLK     */
 				    <&gpio_prt21 5 0>,  /* D9  - SPI_MOSI    */
 				    <&gpio_prt21 4 0>,  /* D10 - SPI_MISO    */
-				    <&gpio_prt21 7 0>;  /* D11 - SPI_CS      */
+				    <&gpio_prt21 7 0>,  /* D11 - SPI_CS      */
+				    <&gpio_prt16 0 0>,  /* D12 - P16_0       */
+				    <&gpio_prt16 1 0>,  /* D13 - P16_1       */
+				    <&gpio_prt16 2 0>,  /* D14 - P16_2       */
+				    <&gpio_prt16 3 0>,  /* D15 - P16_3       */
+				    <&gpio_prt16 4 0>,  /* D16 - P16_4       */
+				    <&gpio_prt16 5 0>,  /* D17 - P16_5       */
+				    <&gpio_prt16 6 0>,  /* D18 - P16_6       */
+				    <&gpio_prt16 7 0>,  /* D19 - P16_7       */
+				    <&gpio_prt17 0 0>,  /* D20 - I2C1_SCL    */
+				    <&gpio_prt17 1 0>,  /* D21 - I2C1_SDA    */
+				    <&gpio_prt17 2 0>,  /* D22 - P17_2       */
+				    <&gpio_prt17 3 0>,  /* D23 - P17_3       */
+				    <&gpio_prt17 4 0>,  /* D24 - P17_4       */
+				    <&gpio_prt17 5 0>,  /* D25 - P17_5       */
+				    <&gpio_prt17 7 0>,  /* D26 - P17_7       */
+				    <&gpio_prt11 1 0>,  /* D27 - P11_1 (input use) */
+				    <&gpio_prt9  0 0>,  /* D28 - P9_0 / SERIAL_INT0 */
+				    <&gpio_prt9  1 0>,  /* D29 - P9_1 / SERIAL_INT1 */
+				    <&gpio_prt9  2 0>,  /* D30 - P9_2 / SERIAL_INT2 */
+				    <&gpio_prt9  3 0>;  /* D31 - P9_3 / SERIAL_INT3 */
 
 		builtin-led-gpios = <&gpio_prt10 7 GPIO_ACTIVE_HIGH>,  /* LED_0 (default) */
 				    <&gpio_prt10 7 GPIO_ACTIVE_HIGH>,  /* LED_0            */
 				    <&gpio_prt10 5 GPIO_ACTIVE_HIGH>,  /* LED_1            */
 				    <&gpio_prt20 6 GPIO_ACTIVE_HIGH>;  /* LED_RGB_RED      */
 
-		serials = <&uart2>;
-		i2cs = <&i2c0>;
+		serials = <&uart2 &uart1>;
+		i2cs = <&i2c0 &i2c1>;
 		spis = <&spi0>;
 	};
 };
