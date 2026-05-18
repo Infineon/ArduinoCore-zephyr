@@ -30,6 +30,16 @@
               "version": "5.16.1.4486"
             },
             {
+              "packager": "arduino",
+              "name": "gen-rodata-ld",
+              "version": "0.1.1"
+            },
+            {
+              "packager": "arduino",
+              "name": "zephyr-sketch-tool",
+              "version": "0.3.0"
+            },
+            {
               "packager": "zephyr",
               "name": "arm-zephyr-eabi",
               "version": "1.0.1"
