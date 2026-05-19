@@ -287,14 +287,6 @@ FORCE_EXPORT_SYM(usbd_caps_speed);
 FORCE_EXPORT_SYM(usbd_can_detect_vbus);
 FORCE_EXPORT_SYM(usbd_enable);
 FORCE_EXPORT_SYM(usbd_disable);
-/* usbd_init_device() is an Arduino wrapper in usb_device_descriptor.c.
- * No Zephyr header declares it, so FORCE_EXPORT_SYM is safe here. */
-FORCE_EXPORT_SYM(usbd_init_device);
-#endif
-
-#if defined(CONFIG_USBD_HID_SUPPORT)
-FORCE_EXPORT_SYM(hid_device_register);
-FORCE_EXPORT_SYM(hid_device_submit_report);
 #endif
 
 #if defined(CONFIG_SHARED_MULTI_HEAP)
