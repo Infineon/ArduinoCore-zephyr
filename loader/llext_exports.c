@@ -8,6 +8,7 @@
 #include <strings.h>
 #include <zephyr/llext/symbol.h>
 #include <zephyr/usb/usb_device.h>
+#include <zephyr/usb/class/usbd_hid.h>
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -283,6 +284,11 @@ FORCE_EXPORT_SYM(usbd_caps_speed);
 FORCE_EXPORT_SYM(usbd_can_detect_vbus);
 FORCE_EXPORT_SYM(usbd_enable);
 FORCE_EXPORT_SYM(usbd_disable);
+#endif
+
+#if defined(CONFIG_USBD_HID_SUPPORT)
+FORCE_EXPORT_SYM(hid_device_register);
+FORCE_EXPORT_SYM(hid_device_submit_report);
 #endif
 
 #if defined(CONFIG_SHARED_MULTI_HEAP)
