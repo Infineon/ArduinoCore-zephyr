@@ -27,6 +27,13 @@
 
 #ifdef __cplusplus
 
+/*
+ * Pull in Arduino.h → api/ArduinoAPI.h → Print.h so that HID libraries
+ * (Keyboard, Mouse, etc.) can inherit from Print without including it
+ * explicitly, matching the behaviour of the standard AVR HID.h.
+ */
+#include "Arduino.h"
+
 #if defined(CONFIG_USBD_HID_SUPPORT)
 
 /*
@@ -53,12 +60,12 @@
  * The HID singleton builds the combined descriptor when begin() is called.
  */
 struct HIDSubDescriptor {
-    const void   *data;
-    const uint16_t length;
-    HIDSubDescriptor *next;
+	const void *data;
+	const uint16_t length;
+	HIDSubDescriptor *next;
 
-    HIDSubDescriptor(const void *d, const uint16_t l)
-        : data(d), length(l), next(nullptr) {}
+	HIDSubDescriptor(const void *d, const uint16_t l) : data(d), length(l), next(nullptr) {
+	}
 };
 
 /**
@@ -70,51 +77,55 @@ struct HIDSubDescriptor {
  */
 class HID_ {
 public:
-    HID_();
+	HID_();
 
-    /**
-     * Register the accumulated HID report descriptor with the Zephyr USBD HID
-     * driver.  Must be called before Serial.begin().
-     *
-     * @return 0 on success, negative errno on failure.
-     */
-    int begin();
+	/**
+	 * Register the accumulated HID report descriptor with the Zephyr USBD HID
+	 * driver.  Must be called before Serial.begin().
+	 *
+	 * @return 0 on success, negative errno on failure.
+	 */
+	int begin();
 
-    /** Deactivate HID reporting (does not de-register the descriptor). */
-    void end();
+	/** Deactivate HID reporting (does not de-register the descriptor). */
+	void end();
 
-    /**
-     * Submit an HID input report.
-     *
-     * @param id   Report ID (0 if no report IDs are used in the descriptor).
-     * @param data Pointer to the report payload.
-     * @param len  Payload length in bytes.
-     * @return 0 on success, negative errno on failure.
-     */
-    int SendReport(uint8_t id, const void *data, int len);
+	/**
+	 * Submit an HID input report.
+	 *
+	 * @param id   Report ID (0 if no report IDs are used in the descriptor).
+	 * @param data Pointer to the report payload.
+	 * @param len  Payload length in bytes.
+	 * @return 0 on success, negative errno on failure.
+	 */
+	int SendReport(uint8_t id, const void *data, int len);
 
-    /**
-     * Append a HID report descriptor fragment.  Typically called by library
-     * constructors before begin().
-     */
-    void AppendDescriptor(HIDSubDescriptor *node);
+	/**
+	 * Append a HID report descriptor fragment.  Typically called by library
+	 * constructors before begin().
+	 */
+	void AppendDescriptor(HIDSubDescriptor *node);
 
-    /** Returns true if begin() succeeded and the USB interface is ready. */
-    bool isReady() const { return _ifaceReady; }
+	/** Returns true if begin() succeeded and the USB interface is ready. */
+	bool isReady() const {
+		return _ifaceReady;
+	}
 
-    /* Allow the iface_ready callback (C linkage) to update _ifaceReady. */
-    void _setIfaceReady(bool r) { _ifaceReady = r; }
+	/* Allow the iface_ready callback (C linkage) to update _ifaceReady. */
+	void _setIfaceReady(bool r) {
+		_ifaceReady = r;
+	}
 
 private:
-    HIDSubDescriptor *_descriptors;
-    uint16_t          _descriptorSize;
-    bool              _registered;
-    bool              _active;
-    volatile bool     _ifaceReady;
+	HIDSubDescriptor *_descriptors;
+	uint16_t _descriptorSize;
+	bool _registered;
+	bool _active;
+	volatile bool _ifaceReady;
 };
 
 /** Access the HID singleton. */
-HID_& HID();
+HID_ &HID();
 
 #endif /* CONFIG_USBD_HID_SUPPORT */
 #endif /* __cplusplus */
