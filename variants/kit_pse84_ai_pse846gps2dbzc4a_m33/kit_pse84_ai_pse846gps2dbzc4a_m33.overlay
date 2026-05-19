@@ -214,45 +214,6 @@ spi0: &scb3 {
 /*   D31 = P9_3   (SERIAL_INT3 / alternate serial signal 3)           */
 /*                                                                    */
 /* ------------------------------------------------------------------ */
-/* USB High-Speed Device (DWC2 core at 0x54900000)                    */
-/*                                                                    */
-/* NOTE: "infineon,usbhs" binding is only available on Zephyr main.  */
-/* For v4.4.0 we use "snps,dwc2" alone, which binds the generic       */
-/* udc_dwc2 driver. The mmio-peri-* clock properties from Zephyr main */
-/* are omitted here because they are unknown to the v4.4.0 binding.  */
-/* Swap to compatible = "infineon,usbhs", "snps,dwc2" and restore    */
-/* those properties once you upgrade the Zephyr base.                 */
-/* ------------------------------------------------------------------ */
-/ {
-	zephyr_udc0: usbhs@54900000 {
-		compatible = "snps,dwc2";
-		reg = <0x54900000 0x40100>;
-		interrupt-parent = <&nvic>;
-		interrupts = <174 4>,  /* usbhs_ctrl_irqn */
-			     <175 4>;  /* usbhss_irqn */
-		num-in-eps = <9>;
-		num-out-eps = <9>;
-		ghwcfg1 = <0x00000000>;
-		ghwcfg2 = <0x228fe052>;
-		ghwcfg4 = <0xe2103a20>;
-		status = "okay";
-
-		/* HID device instance — enables CONFIG_USBD_HID_SUPPORT via
-		 * DT_HAS_ZEPHYR_HID_DEVICE_ENABLED. in-report-size and
-		 * in-polling-period-us are required by the binding; choose
-		 * values suitable for a generic HID device (64-byte report,
-		 * 1 ms polling). The Arduino HID library adjusts descriptor
-		 * and report sizes at runtime via the Zephyr USBD HID API. */
-		hid_dev0: hid_dev0 {
-			compatible = "zephyr,hid-device";
-			label = "HID0";
-			protocol-code = "none";
-			in-report-size = <64>;
-			in-polling-period-us = <1000>;
-		};
-	};
-};
-
 / {
 	zephyr,user {
 		digital-pin-gpios = <&gpio_prt10 7 0>,  /* D0  - LED_0       */
