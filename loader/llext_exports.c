@@ -8,8 +8,6 @@
 #include <strings.h>
 #include <zephyr/llext/symbol.h>
 #include <zephyr/usb/usb_device.h>
-#include <zephyr/usb/usbd.h>
-#include <zephyr/usb/class/usbd_hid.h>
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -285,11 +283,9 @@ FORCE_EXPORT_SYM(usbd_caps_speed);
 FORCE_EXPORT_SYM(usbd_can_detect_vbus);
 FORCE_EXPORT_SYM(usbd_enable);
 FORCE_EXPORT_SYM(usbd_disable);
-/* Arduino wrapper — defined in cores/arduino/usb_device_descriptor.c,
- * compiled into the loader.  Sketches call this to initialise USB without
- * having to manage the usbd_context directly. */
-extern struct usbd_context *usbd_init_device(usbd_msg_cb_t msg_cb);
-EXPORT_SYMBOL(usbd_init_device);
+/* usbd_init_device() is an Arduino wrapper in usb_device_descriptor.c.
+ * No Zephyr header declares it, so FORCE_EXPORT_SYM is safe here. */
+FORCE_EXPORT_SYM(usbd_init_device);
 #endif
 
 #if defined(CONFIG_USBD_HID_SUPPORT)
