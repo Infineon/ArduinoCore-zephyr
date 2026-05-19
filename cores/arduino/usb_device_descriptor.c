@@ -150,17 +150,8 @@ struct usbd_context *usbd_setup_device(usbd_msg_cb_t msg_cb) {
 	return &usbd;
 }
 
-static bool _usbd_initialized = false;
-
 struct usbd_context *usbd_init_device(usbd_msg_cb_t msg_cb) {
 	int err;
-
-	/* Guard against double-initialisation (e.g. Serial.begin() followed
-	 * by HID().begin(), or vice-versa).  Return the existing context so
-	 * the caller can still call usbd_enable() if needed. */
-	if (_usbd_initialized) {
-		return &usbd;
-	}
 
 	if (usbd_setup_device(msg_cb) == NULL) {
 		return NULL;
@@ -173,7 +164,6 @@ struct usbd_context *usbd_init_device(usbd_msg_cb_t msg_cb) {
 	}
 	/* doc device init end */
 
-	_usbd_initialized = true;
 	return &usbd;
 }
 
