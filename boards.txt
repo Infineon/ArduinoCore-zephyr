@@ -202,7 +202,6 @@ frdm_mcxn947.build.zephyr_target=frdm_mcxn947//cpu0
 frdm_mcxn947.build.zephyr_args=
 frdm_mcxn947.build.zephyr_hals=hal_nxp
 frdm_mcxn947.build.variant=frdm_mcxn947_mcxn947_cpu0
-
 frdm_mcxn947.build.extra_flags=
 frdm_mcxn947.build.postbuild.cmd="{tools.imgtool.path}/{tools.imgtool.cmd}" exit
 frdm_mcxn947.build.board=FRDM_MCXN947
@@ -361,7 +360,6 @@ frdm_rw612.build.zephyr_target=frdm_rw612
 frdm_rw612.build.zephyr_args=
 frdm_rw612.build.zephyr_hals=hal_stm32
 frdm_rw612.build.variant=frdm_rw612_rw612
-
 frdm_rw612.build.extra_flags=
 frdm_rw612.build.postbuild.cmd="{tools.imgtool.path}/{tools.imgtool.cmd}" exit
 frdm_rw612.build.board=FRDM_RW612
@@ -462,7 +460,6 @@ portentac33.build.zephyr_args=
 portentac33.build.zephyr_hals=hal_renesas nanopb
 portentac33.build.artifact=zephyr_main
 portentac33.build.variant=arduino_portenta_c33_r7fa6m5bh3cfc
-
 portentac33.build.extra_flags=
 portentac33.build.postbuild.cmd="{tools.imgtool.path}/{tools.imgtool.cmd}" exit
 portentac33.build.board=PORTENTA_C33
@@ -703,3 +700,5 @@ kit_pse84_ai.bootloader.tool.default=openocd
 kit_pse84_ai.bootloader.file=zephyr-{build.variant}.hex
 kit_pse84_ai.tools.openocd.bootloader.pattern.windows=cmd /C cd /D "{runtime.platform.path}/firmwares" && "{path}/{cmd}" {bootloader.verbose} -s "{path}/scripts/" -s "{runtime.platform.path}/variants/{build.variant}/" -f "{runtime.platform.path}/variants/{build.variant}/openocd.cfg" -c "set bootloader_file [list {bootloader.file}]; telnet_port disabled; init; reset init; halt; adapter speed 10000; program $bootloader_file; reset run; shutdown"
 kit_pse84_ai.bootloader.target=pse84
+
+##########################################################################################
