@@ -135,6 +135,8 @@ jobs:
     # NOTE: this name is hardcoded in ci_inspect_logs.py
     name: Build for ${{ matrix.board }}
     runs-on: ubuntu-latest
+    # TODO: remove this once all boards are compatible with Zephyr 4.4.0
+    if: ${{ contains(fromJSON('["nano33ble","niclasense","ek_ra8d1","kit_pse84_ai"]'), matrix.board) }}
     needs:
       - build-env
     env:
@@ -379,7 +381,8 @@ jobs:
       FQBN: arduino:${{ matrix.subarch }}:${{ matrix.board }}:link_mode=${{ matrix.link_mode }}
       CORE_ARTIFACT: ArduinoCore-${{ matrix.artifact }}-${{ needs.build-env.outputs.CORE_HASH }}.tar.bz2
       ARTIFACT_TAG: ${{ needs.build-env.outputs.CORE_HASH }}-${{ matrix.board }}-${{ matrix.link_mode }}
-    if: ${{ !cancelled() && needs.build-env.result == 'success' }}
+    # TODO: remove this once all boards are compatible with Zephyr 4.4.0
+    if: ${{ !cancelled() && needs.build-env.result == 'success' && contains(fromJSON('["nano33ble","niclasense","ek_ra8d1","kit_pse84_ai"]'), matrix.board) }}
     steps:
 
       # only needs the test list generator and artifact information
