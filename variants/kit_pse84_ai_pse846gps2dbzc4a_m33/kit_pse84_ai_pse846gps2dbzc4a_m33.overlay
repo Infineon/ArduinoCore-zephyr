@@ -45,6 +45,10 @@
 /* ------------------------------------------------------------------ */
 /* Enable GPIO ports needed for digital pins, LEDs, button, SPI, I2C */
 /* ------------------------------------------------------------------ */
+&gpio_prt7 {
+	status = "okay";
+};
+
 &gpio_prt8 {
 	status = "okay";
 };
@@ -53,7 +57,31 @@
 	status = "okay";
 };
 
+&gpio_prt10 {
+	status = "okay";
+};
+
+&gpio_prt11 {
+	status = "okay";
+};
+
+&gpio_prt13 {
+	status = "okay";
+};
+
+&gpio_prt15 {
+	status = "okay";
+};
+
+&gpio_prt16 {
+	status = "okay";
+};
+
 &gpio_prt17 {
+	status = "okay";
+};
+
+&gpio_prt20 {
 	status = "okay";
 };
 
