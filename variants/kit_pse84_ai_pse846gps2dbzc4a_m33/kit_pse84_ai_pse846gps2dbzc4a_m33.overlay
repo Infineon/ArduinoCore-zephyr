@@ -216,38 +216,58 @@ spi0: &scb3 {
 /* ------------------------------------------------------------------ */
 / {
 	zephyr,user {
-		digital-pin-gpios = <&gpio_prt10 7 0>,  /* D0  - LED_0       */
-				    <&gpio_prt10 5 0>,  /* D1  - LED_1       */
-				    <&gpio_prt20 6 0>,  /* D2  - LED_RGB_RED */
-				    <&gpio_prt20 4 0>,  /* D3  - LED_RGB_GRN */
-				    <&gpio_prt20 5 0>,  /* D4  - LED_RGB_BLU */
-				    <&gpio_prt7  0 0>,  /* D5  - SW1 / BTN   */
-				    <&gpio_prt8  0 0>,  /* D6  - I2C_SCL     */
-				    <&gpio_prt8  1 0>,  /* D7  - I2C_SDA     */
-				    <&gpio_prt21 6 0>,  /* D8  - SPI_CLK     */
-				    <&gpio_prt21 5 0>,  /* D9  - SPI_MOSI    */
-				    <&gpio_prt21 4 0>,  /* D10 - SPI_MISO    */
-				    <&gpio_prt21 7 0>,  /* D11 - SPI_CS      */
-				    <&gpio_prt16 0 0>,  /* D12 - P16_0       */
+		digital-pin-gpios = <&gpio_prt17 5 0>,  /* D25 - P17_5       */
+				    <&gpio_prt17 7 0>,  /* D26 - P17_7       */
 				    <&gpio_prt16 1 0>,  /* D13 - P16_1       */
-				    <&gpio_prt16 2 0>,  /* D14 - P16_2       */
+				    <&gpio_prt16 0 0>,  /* D12 - P16_0       */
 				    <&gpio_prt16 3 0>,  /* D15 - P16_3       */
-				    <&gpio_prt16 4 0>,  /* D16 - P16_4       */
+				    <&gpio_prt16 2 0>,  /* D14 - P16_2       */
 				    <&gpio_prt16 5 0>,  /* D17 - P16_5       */
-				    <&gpio_prt16 6 0>,  /* D18 - P16_6       */
+				    <&gpio_prt16 4 0>,  /* D16 - P16_4       */
 				    <&gpio_prt16 7 0>,  /* D19 - P16_7       */
-				    <&gpio_prt17 0 0>,  /* D20 - I2C1_SCL    */
-				    <&gpio_prt17 1 0>,  /* D21 - I2C1_SDA    */
+				    <&gpio_prt16 6 0>,  /* D18 - P16_6       */
+				    <&gpio_prt11 1 0>,  /* D27 - P11_1 (input only) */
+				    <&gpio_prt17 4 0>,  /* D24 - P17_4       */
 				    <&gpio_prt17 2 0>,  /* D22 - P17_2       */
 				    <&gpio_prt17 3 0>,  /* D23 - P17_3       */
-				    <&gpio_prt17 4 0>,  /* D24 - P17_4       */
-				    <&gpio_prt17 5 0>,  /* D25 - P17_5       */
-				    <&gpio_prt17 7 0>,  /* D26 - P17_7       */
-				    <&gpio_prt11 1 0>,  /* D27 - P11_1 (input use) */
-				    <&gpio_prt9  0 0>,  /* D28 - P9_0 / SERIAL_INT0 */
-				    <&gpio_prt9  1 0>,  /* D29 - P9_1 / SERIAL_INT1 */
+				    <&gpio_prt17 0 0>,  /* D20 - I2C1_SCL    */
+				    <&gpio_prt17 1 0>,  /* D21 - I2C1_SDA    */
+
+				    <&gpio_prt9  3 0>,  /* D31 - P9_3 / SERIAL_INT3 */
 				    <&gpio_prt9  2 0>,  /* D30 - P9_2 / SERIAL_INT2 */
-				    <&gpio_prt9  3 0>;  /* D31 - P9_3 / SERIAL_INT3 */
+				    <&gpio_prt9  1 0>,  /* D29 - P9_1 / SERIAL_INT1 */
+				    <&gpio_prt9  0 0>,  /* D28 - P9_0 / SERIAL_INT0 */
+
+				    <&gpio_prt15 0 0>,  /* D32 - P15_0 - A0  */
+				    <&gpio_prt15 1 0>,  /* D33 - P15_1 - A1  */
+				    <&gpio_prt15 2 0>,  /* D34 - P15_2 - A2  */
+				    <&gpio_prt15 3 0>,  /* D35 - P15_3 - A3  */
+				    <&gpio_prt15 4 0>,  /* D36 - P15_4 - A4  */
+				    <&gpio_prt15 5 0>,  /* D37 - P15_5 - A5  */
+				    <&gpio_prt15 6 0>,  /* D38 - P15_6 - A6  */
+				    <&gpio_prt15 7 0>,  /* D39 - P15_7 - A7  */
+
+				    <&gpio_prt13 0 0>,  /* D40 - P13_0 - A8  */
+				    <&gpio_prt13 1 0>,  /* D41 - P13_1 - A9  */
+				    <&gpio_prt13 2 0>,  /* D42 - P13_2 - A10 */
+				    <&gpio_prt13 3 0>,  /* D43 - P13_3 - A11 */
+				    <&gpio_prt13 4 0>,  /* D44 - P13_4 - A12 */
+				    <&gpio_prt13 5 0>,  /* D45 - P13_5 - A13 */
+				    <&gpio_prt13 6 0>,  /* D46 - P13_6 - A14 */
+				    <&gpio_prt13 7 0>,  /* D47 - P13_7 - A15 */
+
+				    <&gpio_prt10 7 0>,  /* LED_0       */
+				    <&gpio_prt10 5 0>,  /* LED_1       */
+				    <&gpio_prt20 6 0>,  /* LED_RGB_RED */
+				    <&gpio_prt20 4 0>,  /* LED_RGB_GRN */
+				    <&gpio_prt20 5 0>,  /* LED_RGB_BLU */
+				    <&gpio_prt7  0 0>,  /* SW1 / BTN   */
+				    <&gpio_prt8  0 0>,  /* I2C_SCL     */
+				    <&gpio_prt8  1 0>,  /* I2C_SDA     */
+				    <&gpio_prt21 6 0>,  /* SPI_CLK     */
+				    <&gpio_prt21 5 0>,  /* SPI_MOSI    */
+				    <&gpio_prt21 4 0>,  /* SPI_MISO    */
+				    <&gpio_prt21 7 0>;  /* SPI_CS      */
 
 		builtin-led-gpios = <&gpio_prt10 7 GPIO_ACTIVE_HIGH>,  /* LED_0 (default) */
 				    <&gpio_prt10 7 GPIO_ACTIVE_HIGH>,  /* LED_0            */
