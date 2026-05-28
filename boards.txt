@@ -676,6 +676,7 @@ kit_pse84_ai.build.mcu=cortex-m33
 kit_pse84_ai.build.fpu=-mfpu=fpv5-sp-d16
 kit_pse84_ai.build.architecture=cortex-m33
 kit_pse84_ai.build.float-abi=-mfloat-abi=hard
+kit_pse84_ai.compiler.zephyr.specs=
 kit_pse84_ai.build.extra_flags=
 kit_pse84_ai.build.specs=
 kit_pse84_ai.build.postbuild.cmd="{tools.openocd.path}/{tools.openocd.cmd}" exit
