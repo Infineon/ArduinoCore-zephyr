@@ -13,31 +13,82 @@
 #
 #     <maj>.<min>.<patch>-<number-of-commits-since-tag>-g<commit-hash>
 #
-# The regexp will remove the commit hash and split the patch number, then awk
-# converts the tokens to:
+# A bash regex extracts the components and produces:
 #
-#     <maj>.<min>.<next-patch>-0.dev
+#     <maj>.<min>.<next-patch>-0.<label>.<count>
+#
+# The leading "0" is a numeric SemVer identifier that sorts below any
+# alphanumeric pre-release label (alpha, beta, rc), ensuring non-pre-release
+# development builds always sort lower than explicitly tagged pre-releases of
+# the same version.
 #
 # If the tag refers to a pre-release, like "<maj>.<min>.<patch>-<extra-stuff>",
-# sed will output a total of 3 arguments and the format of the final awk output
-# will be:
+# the output will be:
 #
-#     <maj>.<min>.<patch>-<extra-stuff>-0.dev
+#     <maj>.<min>.<patch>-<extra-stuff>.<label>.<count>
+#
+# The identifier order in both cases is: prerel > label > count, so that
+# SemVer ordering reflects: maj/min/patch > prerel > label > count.
+#
+# The label encodes the build context and is chosen so that SemVer ordering
+# reflects trustworthiness: branch push < PR < tag push < local build:
+#
+#     Branch push: <label> = "head.<branch-name>"
+#     PR build:    <label> = "pr.<pr-number>"
+#     Tag push:    <label> = "tag.<tag-name>"
+#     Local build: <label> = "wip.<date-time>"
 #
 # These are among the lowest possible SemVer versions greater than the last
 # tagged version. If there are no tags at all (for example when run in a fork
 # etc), it defaults to "9.9.9-<date>".
 #
-# Finally, non-exact-tag version have a "+<commit-hash-dirty>" appended. The
+# Finally, non-exact-tag versions have a "+<commit-hash[-dirty]>" appended. The
 # commit hash used is taken from HEAD_REF if set - this is to ensure that in CI
 # environments the correct commit is used, even in pull requests where HEAD
 # might be a temporary detached commit.
 
+# Determine pre-release label based on build context
+if [ -z "$GITHUB_ACTIONS" ]; then
+	# local build, highest precedence
+	KIND="wip"
+	NAME="$(date '+%Y%m%d-%H%M%S')"
+elif [ "$GITHUB_EVENT_NAME" == "pull_request" ]; then
+	# CI build for a PR, medium precedence
+	KIND="pr"
+	NAME="$(jq -r .number < "$GITHUB_EVENT_PATH")"
+elif [[ "$GITHUB_REF" =~ ^refs/(heads|tags)/(.*) ]]; then
+	# CI build for a branch or tag push, lowest precedence
+	KIND="${BASH_REMATCH[1]%s}" # "heads" -> "head", "tags" -> "tag"
+	NAME="${BASH_REMATCH[2]//\//-}" # replace slashes with dashes
+else
+	# unknown CI context
+	echo "Error: unexpected GITHUB_REF '$GITHUB_REF'" >&2
+	exit 1
+fi
+
 VERSION=$(git describe --tags --exact-match --exclude '*/*' 2>/dev/null)
 if [ -z "$VERSION" ]; then
-	STEM=$(git describe --tags --exclude '*/*' 2>/dev/null |
-	       sed 's/\.\([[:digit:]]\+\)\(-.*\)*-[[:digit:]]\+-g.*/ \1 \2/' |
-	       awk '{ if (NF==2) { print $1 "." ($2+1) "-0.dev" } else { print $1 "." $2 $3 "-0.dev" }}')
+	DESCRIBE=$(git describe --tags --exclude '*/*' 2>/dev/null)
+	if [[ "$DESCRIBE" =~ ^([0-9]+\.[0-9]+\.)([0-9]+)(-.*)?-([0-9]+)-g ]]; then
+		maj_min="${BASH_REMATCH[1]}"
+		patch="${BASH_REMATCH[2]}"
+		prerel="${BASH_REMATCH[3]}" # optional
+		count="${BASH_REMATCH[4]}"
+#		echo "Git describe: maj_min='$maj_min' patch='$patch' prerel='$prerel' count='$count'" >&2
+		if [ "$KIND" == "tag" ] ; then
+			# number of commits since tag is irrelevant for a tag push
+			label="${KIND}.${NAME}"
+		else
+			label="${KIND}.${NAME}.${count}"
+		fi
+		if [ -z "$prerel" ]; then
+			STEM="${maj_min}$((patch+1))-0.${label}"
+		else
+			STEM="${maj_min}${patch}${prerel}.${label}"
+		fi
+	else
+		echo "Warning: unexpected git describe output '$DESCRIBE'" >&2
+	fi
 	if [ -z "$STEM" ]; then
 		# no tags: build in a fork or locally, use a maxed out version with date+hash
 		STEM="9.9.9-$(date '+%Y%m%d-%H%M%S')"
