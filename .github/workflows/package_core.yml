@@ -174,9 +174,6 @@ jobs:
         run: |
           # create the report directory
           mkdir -p reports
-          echo "::group::ccache stats before build"
-          ccache --show-stats
-          echo "::endgroup::"
           # run the build, capturing stdout and stderr
           if ! ./extra/build.sh ${{ matrix.board }} 1> >(tee $REPORT.stdout) 2> >(tee $REPORT.stderr) ; then
             # build failed, capture errors in summary and stop job without artifacts
@@ -185,38 +182,6 @@ jobs:
             echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
             cat $REPORT.stderr >> $GITHUB_STEP_SUMMARY
             echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
-
-            # --- DEBUG HELPERS ---
-            # Dump the merged kernel config and check dynamic-interrupt flags
-            echo "--- BEGIN DEBUG: merged .config ---" >> $REPORT.stderr || true
-            if [ -f build/${{ matrix.variant }}/zephyr/.config ]; then
-              echo "(showing config snippet around DYNAMIC_INTERRUPTS)" >> $REPORT.stderr || true
-              grep -n "DYNAMIC_INTERRUPTS\|IRQ\|ARCH_IRQ" build/${{ matrix.variant }}/zephyr/.config || true
-              echo "--- full .config ---" >> $REPORT.stderr || true
-              sed -n '1,240p' build/${{ matrix.variant }}/zephyr/.config >> $REPORT.stderr || true
-            else
-              echo "no build/${{ matrix.variant }}/zephyr/.config present" >> $REPORT.stderr || true
-            fi
-
-            # Try to list symbols in app and zephyr static libs to find where symbol should come from
-            echo "--- nm search for arch_irq_disconnect_dynamic in built libs ---" >> $REPORT.stderr || true
-            for f in build/${{ matrix.variant }}/app/libapp.a build/${{ matrix.variant }}/zephyr/*.a ; do
-              if [ -f "$f" ]; then
-                echo "-- $f --" >> $REPORT.stderr || true
-                arm-zephyr-eabi-nm -A "$f" 2>/dev/null | grep arch_irq_disconnect_dynamic || true
-              fi
-            done
-
-            # Dump the linker map if it exists
-            if [ -f build/${{ matrix.variant }}/zephyr/zephyr_pre0.map ]; then
-              echo "--- linker map ---" >> $REPORT.stderr || true
-              sed -n '1,240p' build/${{ matrix.variant }}/zephyr/zephyr_pre0.map >> $REPORT.stderr || true
-            else
-              echo "no linker map found" >> $REPORT.stderr || true
-            fi
-
-            # End debug helpers
-
             exit 1
           fi
 
@@ -232,12 +197,6 @@ jobs:
                              | awk 'BEGIN {split("B KB MB GB", u); for(i in u) m[u[i]]=1024^(i-1)} /:/ {print "[\"" $1 "\"," $2*m[$3] "," $4*m[$5] "]"}' \
                              | sort \
                              | jq -s "map((select(.[0] == \"FLASH:\") | .[2]) |= ${LOADER_SIZE}) + [ [ \"SKETCH:\", 0, ${SKETCH_SIZE} ] ]" > $REPORT.meminfo
-
-          # ccache stats update
-          echo "::group::ccache stats after build"
-          ccache --evict-older-than 30d
-          ccache --show-stats
-          echo "::endgroup::"
 
       - name: Package board artifacts
         if: ${{ !cancelled() }}
@@ -497,8 +456,6 @@ jobs:
         run: |
           # gather the array of job metadata (especially name and ID) for the current workflow run
           export WORKFLOW_JOBS=$(gh run view ${{ github.run_id }} --attempt ${{ github.run_attempt }} --json jobs --jq '.jobs')
-          # Archive the input set of reports for later inspection
-          tar jchf build-reports-${{ needs.build-env.outputs.CORE_HASH }}.tar.bz2 zephyr-* arduino-*.json
           # Run the log inspection script
           extra/ci_inspect_logs.py result summary full_log
           cat result
@@ -547,21 +504,12 @@ jobs:
           retention-days: 1
 
       # upload new official test size artifact (for AWS storage)
-      - name: Archive sketch size information
+      - name: Archive sketch report information
         uses: actions/upload-artifact@v7
         if: ${{ github.event_name == 'push' }}
         with:
           name: size-reports
           path: size-reports-${{ needs.build-env.outputs.CORE_HASH }}.tar.bz2
-          retention-days: 1
-          archive: false
-
-      # upload input set of build reports artifact (for CI debugging)
-      - name: Archive input test reports
-        uses: actions/upload-artifact@v7
-        with:
-          name: build-reports
-          path: build-reports-${{ needs.build-env.outputs.CORE_HASH }}.tar.bz2
           retention-days: 1
           archive: false
 
