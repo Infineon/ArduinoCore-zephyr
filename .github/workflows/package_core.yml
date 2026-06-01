@@ -112,7 +112,7 @@ jobs:
           echo "SUB_ARCHES=$(jq -c 'map(.subarch) | unique' <<< ${ALL_BOARD_DATA})" >> "$GITHUB_ENV"
           # Archive the build environment for later jobs
           (cd && tar cphf - .cmake work zephyr-sdk-* | zstd > build-env.tar.zstd)
-          # The API is only needed for packaging, not for building, so it's separate.
+          # The API is only needed for packaging, not for building, so it's separate
           # Use west to locate the module, stage it under the expected path, then archive.
           source venv/bin/activate
           API_SRC="$(west list -f {abspath} ArduinoCore-API)/api"
@@ -184,6 +184,9 @@ jobs:
         run: |
           # create the report directory
           mkdir -p reports
+          echo "::group::ccache stats before build"
+          ccache --show-stats
+          echo "::endgroup::"
           # run the build, capturing stdout and stderr
           if ! ./extra/build.sh ${{ matrix.board }} 1> >(tee $REPORT.stdout) 2> >(tee $REPORT.stderr) ; then
             # build failed, capture errors in summary and stop job without artifacts
@@ -207,6 +210,12 @@ jobs:
                              | awk 'BEGIN {split("B KB MB GB", u); for(i in u) m[u[i]]=1024^(i-1)} /:/ {print "[\"" $1 "\"," $2*m[$3] "," $4*m[$5] "]"}' \
                              | sort \
                              | jq -s "map((select(.[0] == \"FLASH:\") | .[2]) |= ${LOADER_SIZE}) + [ [ \"SKETCH:\", 0, ${SKETCH_SIZE} ] ]" > $REPORT.meminfo
+
+          # ccache stats update
+          echo "::group::ccache stats after build"
+          ccache --evict-older-than 30d
+          ccache --show-stats
+          echo "::endgroup::"
 
       - name: Package board artifacts
         if: ${{ !cancelled() }}
@@ -272,6 +281,7 @@ jobs:
       - uses: actions/checkout@v6
         with:
           ref: ${{ env.HEAD_REF }}
+          submodules: 'recursive'
           fetch-depth: 0
           persist-credentials: false
           fetch-tags: true
@@ -292,7 +302,7 @@ jobs:
       - name: Package core
         run: |
           # Extract the API snapshot and board binaries in place
-          rm -f cores/arduino/api # remove the symlink, replace with actual files
+          rm -f cores/arduino/api # remove broken symlink
           tar --use-compress-program=unzstd -xpf arduino-api.tar.zstd
           for f in binaries-*.tar.zstd ; do
             tar --use-compress-program=unzstd -xpf $f
@@ -528,14 +538,13 @@ jobs:
           retention-days: 1
 
       # upload new official test size artifact (for AWS storage)
-      - name: Archive sketch report information
+      - name: Archive sketch size information
         uses: actions/upload-artifact@v7
         if: ${{ github.event_name == 'push' }}
         with:
           name: size-reports
           path: size-reports-${{ needs.build-env.outputs.CORE_HASH }}.tar.bz2
           retention-days: 1
-          archive: false
 
       # The last line makes the job fail if the 'result' file does not contain "PASSED".
       # No further actions are allowed in case of error.
