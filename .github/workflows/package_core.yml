@@ -113,6 +113,7 @@ jobs:
           name: arduino-api
           path: arduino-api.tar.zstd
           retention-days: 1
+          archive: false
 
 
 
@@ -267,7 +268,7 @@ jobs:
       - uses: actions/download-artifact@v8
         with:
           path: .
-          name: arduino-api
+          name: arduino-api.tar.zstd
 
       # Get all built binaries
       - uses: actions/download-artifact@v8
@@ -309,7 +310,7 @@ jobs:
       - uses: geekyeggo/delete-artifact@v6
         with:
           name: |
-            arduino-api
+            arduino-api.tar.zstd
             binaries-*
             build-env.tar.zstd
           failOnError: false
