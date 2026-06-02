@@ -668,4 +668,3 @@ jobs:
           version: ${{ needs.build-env.outputs.CORE_VER }}
           artifact: snippets-${{ needs.build-env.outputs.CORE_TAG }}
           base-branch: ${{ needs.build-env.outputs.CORE_BRANCH }}
-
