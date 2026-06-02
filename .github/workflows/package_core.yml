@@ -64,7 +64,6 @@ jobs:
 
       - uses: actions/checkout@v6
         with:
-          ref: ${{ env.HEAD_REF }}
           submodules: 'recursive'
           fetch-depth: 0
           persist-credentials: false
@@ -260,7 +259,6 @@ jobs:
 
       - uses: actions/checkout@v6
         with:
-          ref: ${{ env.HEAD_REF }}
           submodules: 'recursive'
           fetch-depth: 0
           persist-credentials: false
@@ -347,7 +345,6 @@ jobs:
       # only needs the test list generator and artifact information
       - uses: actions/checkout@v6
         with:
-          ref: ${{ env.HEAD_REF }}
           fetch-depth: 0
           persist-credentials: false
           sparse-checkout: |
@@ -444,7 +441,6 @@ jobs:
 
       - uses: actions/checkout@v6
         with:
-          ref: ${{ env.HEAD_REF }}
           fetch-depth: 0
           persist-credentials: false
           fetch-tags: true
@@ -624,7 +620,6 @@ jobs:
 
       - uses: actions/checkout@v6
         with:
-          ref: ${{ env.HEAD_REF }}
           fetch-depth: 0
           persist-credentials: false
           fetch-tags: true
