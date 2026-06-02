@@ -8,3 +8,4 @@ cxxflags.txt
 includes.txt
 syms-dynamic.ld
 syms-static.ld
+.vscode/
