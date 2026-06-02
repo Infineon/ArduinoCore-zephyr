@@ -37,8 +37,7 @@ west config manifest.project-filter -- "$HAL_FILTER"
 west update "$@"
 bash ./extra/apply_zephyr_patches.sh
 west zephyr-export
-ZEPHYR_BASE="$(west list -f '{abspath}' zephyr)"
-pip install -r "$ZEPHYR_BASE/scripts/requirements-base.txt"
+pip install -r ../zephyr/scripts/requirements-base.txt
 log_msg "endgroup"
 
 log_msg "group" "Installing Zephyr SDK 1.0.1"
