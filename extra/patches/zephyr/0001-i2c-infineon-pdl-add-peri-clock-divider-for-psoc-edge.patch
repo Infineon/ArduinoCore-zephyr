@@ -30,7 +30,6 @@ pressure sensor at 100 kHz standard mode.
 Signed-off-by: Arduino PSoC Edge BSP contributors
 
 diff --git a/drivers/i2c/i2c_infineon_pdl.c b/drivers/i2c/i2c_infineon_pdl.c
-index 54efccdc1a8..997fba69eea 100644
 --- a/drivers/i2c/i2c_infineon_pdl.c
 +++ b/drivers/i2c/i2c_infineon_pdl.c
 @@ -233,6 +233,120 @@ void ifx_cat1_i2c_register_callback(const struct device *dev,
