@@ -90,7 +90,6 @@ declutter_file() {
 
 # create the list of files and directories to include
 TEMP_INC=$(mktemp -p . | sed 's/\.\///')
-TEMP_BOOTLOADERS=$(mktemp -d -p . | sed 's/\.\///')
 echo ${TEMP_BOARDS} >> ${TEMP_INC}
 echo ${TEMP_PLATFORM} >> ${TEMP_INC}
 declutter_file extra/artifacts/_common.inc >> ${TEMP_INC}
@@ -102,20 +101,6 @@ for variant in $INCLUDED_VARIANTS ; do
 	# add the firmwares, if some are missing notify at end
 	if ! ls firmwares/zephyr-${variant}.* >> ${TEMP_INC} ; then
 		log_msg error "No firmware for '${variant}' found."
-		RET=3
-	fi
-
-	# zephyr-sketch-tool expects bootloader files under 'bootloaders/'.
-	# Keep the canonical files in 'firmwares/' and mirror the HEX here.
-	if [ -f "firmwares/zephyr-${variant}.hex" ] ; then
-		cp "firmwares/zephyr-${variant}.hex" "${TEMP_BOOTLOADERS}/zephyr-${variant}.hex"
-		echo "${TEMP_BOOTLOADERS}/zephyr-${variant}.hex" >> ${TEMP_INC}
-	fi
-
-	# verify Zephyr-generated variant artifacts exist (llext-edk and build flags)
-	if [ ! -d "variants/${variant}/llext-edk" ] || [ ! -f "variants/${variant}/includes.txt" ] \
-	   || [ ! -f "variants/${variant}/cflags.txt" ] || [ ! -f "variants/${variant}/cxxflags.txt" ]; then
-		log_msg error "Missing generated files for variant '${variant}'. Run './extra/build.sh ${variant}' and include the resulting 'variants/${variant}/' and 'firmwares/' in the build artifacts."
 		RET=3
 	fi
 done
@@ -132,9 +117,8 @@ mkdir -p $(dirname ${OUTPUT_FILE})
 tar -cjhf ${OUTPUT_FILE} -X ${TEMP_EXC} -T ${TEMP_INC} \
 	--transform "s,${TEMP_BOARDS},boards.txt," \
 	--transform "s,${TEMP_PLATFORM},platform.txt," \
-	--transform "s,^${TEMP_BOOTLOADERS}/,bootloaders/," \
 	--transform "s,^,ArduinoCore-zephyr/,"
-rm -rf ${TEMP_INC} ${TEMP_EXC} ${TEMP_BOARDS} ${TEMP_PLATFORM} ${TEMP_BOOTLOADERS}
+rm -f ${TEMP_INC} ${TEMP_EXC} ${TEMP_BOARDS} ${TEMP_PLATFORM}
 
 log_msg endgroup
 
