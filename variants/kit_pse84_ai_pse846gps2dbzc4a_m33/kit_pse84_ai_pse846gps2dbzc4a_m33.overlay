@@ -192,6 +192,27 @@ spi0: &scb3 {
 	cs-gpios = <&gpio_prt21 7 GPIO_ACTIVE_LOW>;
 };
 
+/* ------------------------------------------------------------------ */
+/* SPI1 bus (external header) - SCB10 on P16_0/1/2                     */
+/*   CLK  = D12 (P16_0)                                                */
+/*   MOSI = D13 (P16_1)                                                */
+/*   MISO = D14 (P16_2)                                                */
+/*   CS   = D18 (P16_6, GPIO-driven)                                   */
+/* ------------------------------------------------------------------ */
+spi1: &scb10 {
+	#address-cells = <1>;
+	#size-cells = <0>;
+	compatible = "infineon,spi";
+	status = "okay";
+
+	clocks = <&peri0_group1_16bit_2>;
+
+	pinctrl-0 = <&p16_1_scb10_spi_m_mosi &p16_2_scb10_spi_m_miso
+		     &p16_0_scb10_spi_m_clk>;
+	pinctrl-names = "default";
+	cs-gpios = <&gpio_prt16 6 GPIO_ACTIVE_LOW>;
+};
+
 &peri0_group1_16bit_2 {
 	status = "okay";
 	clock-div = <1>;
@@ -208,6 +229,21 @@ spi0: &scb3 {
 };
 
 &p21_6_scb3_spi_m_clk {
+	drive-strength = "full";
+	drive-push-pull;
+};
+
+&p16_1_scb10_spi_m_mosi {
+	drive-strength = "full";
+	drive-push-pull;
+};
+
+&p16_2_scb10_spi_m_miso {
+	drive-strength = "full";
+	input-enable;
+};
+
+&p16_0_scb10_spi_m_clk {
 	drive-strength = "full";
 	drive-push-pull;
 };
@@ -240,6 +276,9 @@ spi0: &scb3 {
 /*   D29 = P9_1   (SERIAL_INT1 / alternate serial signal 1)           */
 /*   D30 = P9_2   (SERIAL_INT2 / alternate serial signal 2)           */
 /*   D31 = P9_3   (SERIAL_INT3 / alternate serial signal 3)           */
+/*                                                                    */
+/* External header SPI1 mapping (SCB10):                              */
+/*   D12 = SPI1_CLK, D13 = SPI1_MOSI, D14 = SPI1_MISO, D18 = SPI1_CS */
 /*                                                                    */
 /* ------------------------------------------------------------------ */
 / {
@@ -304,6 +343,6 @@ spi0: &scb3 {
 
 		serials = <&uart2 &uart1>;
 		i2cs = <&i2c0 &i2c1>;
-		spis = <&spi0>;
+		spis = <&spi0 &spi1>;
 	};
 };
