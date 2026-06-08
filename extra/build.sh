@@ -7,14 +7,6 @@ set -e
 
 source venv/bin/activate
 
-# --- WORKAROUND: Install imgtool Python dependencies ---
-# The kit_pse84_ai board CMake unconditionally invokes imgtool.py (from the
-# bootloader/mcuboot west module) as a post-link step to produce zephyr.signed.hex,
-# regardless of CONFIG_BOOTLOADER_MCUBOOT. Without these packages imgtool fails.
-# TODO: Remove this block once the board CMake signing step is disabled upstream,
-#       or the mcuboot module is excluded from the west manifest.
-pip install cryptography cbor2 cbor click intelhex Pillow
-
 ZEPHYR_BASE=$(west topdir)/zephyr
 
 # Ensure Zephyr patch set is applied even for incremental builds where
@@ -90,7 +82,6 @@ if [ -z "${variant}" ] ; then
 else
 	echo "Build variant: $variant"
 fi
-
 
 # Build the loader
 BUILD_DIR=build/${variant}
