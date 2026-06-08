@@ -80,19 +80,7 @@ fi
 BUILD_DIR=build/${variant}
 VARIANT_DIR=variants/${variant}
 rm -rf ${BUILD_DIR}
-
-
-
-# NOTE: CONFIG_DYNAMIC_INTERRUPTS cannot be forced off — it is `select`ed by
-# CONFIG_LLEXT in Zephyr's subsys/llext/Kconfig. Since we build with -t llext-edk,
-# LLEXT is always enabled and DYNAMIC_INTERRUPTS will always be y. Any attempt to
-# set it to n will be silently overridden by Kconfig with a warning.
-
-# ZEPHYR_EXTRA_MODULES tells Zephyr CMake where to find ArduinoCore-zephyr as a module.
-# This matches the working local build script which passes -DZEPHYR_EXTRA_MODULES=<arduino_core_root>.
-ARDUINO_CORE_DIR=$(pwd)
-echo "[INFO] west build command: west build -d ${BUILD_DIR} -b ${target} loader -t llext-edk ${args} -- -DZEPHYR_EXTRA_MODULES=${ARDUINO_CORE_DIR}"
-west build -d ${BUILD_DIR} -b ${target} loader -t llext-edk ${args} -- -DZEPHYR_EXTRA_MODULES=${ARDUINO_CORE_DIR}
+west build -d ${BUILD_DIR} -b ${target} loader -t llext-edk ${args}
 
 # Extract the generated EDK tarball and copy it to the variant directory
 mkdir -p ${VARIANT_DIR} firmwares
@@ -109,16 +97,7 @@ perl -i -pe "s/${c_comment}//gs unless /${line_preproc_ok}/ || (/${line_comment_
 
 for ext in elf bin hex; do
 	rm -f firmwares/zephyr-$variant.$ext
-	if [ "$ext" = "hex" ] && [ -f ${BUILD_DIR}/zephyr/zephyr.signed.hex ]; then
-		cp ${BUILD_DIR}/zephyr/zephyr.signed.hex firmwares/zephyr-$variant.$ext
-	elif [ "$ext" = "hex" ] && [ -f ${BUILD_DIR}/zephyr/zephyr.hex ]; then
-		if [ "$variant" = "kit_pse84_ai_pse846gps2dbzc4a_m33" ]; then
-			echo "[ERROR] Missing ${BUILD_DIR}/zephyr/zephyr.signed.hex for ${variant}; refusing to package unsigned bootloader"
-			exit 1
-		fi
-		echo "[WARN] Missing ${BUILD_DIR}/zephyr/zephyr.signed.hex for ${variant}; packaging unsigned zephyr.hex instead"
-		cp ${BUILD_DIR}/zephyr/zephyr.hex firmwares/zephyr-$variant.$ext
-	elif [ -f ${BUILD_DIR}/zephyr/zephyr.$ext ]; then
+	if [ -f ${BUILD_DIR}/zephyr/zephyr.$ext ]; then
 		cp ${BUILD_DIR}/zephyr/zephyr.$ext firmwares/zephyr-$variant.$ext
 	fi
 done
