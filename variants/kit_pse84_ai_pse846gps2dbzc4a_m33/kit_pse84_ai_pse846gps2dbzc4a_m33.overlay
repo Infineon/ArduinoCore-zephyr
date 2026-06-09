@@ -178,14 +178,14 @@ uart1: &scb1 {
 };
 
 /* ------------------------------------------------------------------ */
-/* SPI bus - SCB3 on P21_6(CLK) / P21_5(MOSI) / P21_4(MISO)         */
+/* SPI bus - SCB3 on P21_6(CLK) / P21_5(MOSI) / P21_4(MISO)           */
 /*           CS on P21_7 (directly driven as GPIO)                    */
 /* ------------------------------------------------------------------ */
 spi0: &scb3 {
 	#address-cells = <1>;
 	#size-cells = <0>;
 	compatible = "infineon,spi";
-	status = "okay";
+	status = "disabled";
 
 	clocks = <&peri0_group1_16bit_2>;
 
@@ -196,11 +196,11 @@ spi0: &scb3 {
 };
 
 /* ------------------------------------------------------------------ */
-/* SPI1 bus (external header) - SCB10 on P16_0/1/2                     */
-/*   CLK  = D12 (P16_0)                                                */
-/*   MOSI = D13 (P16_1)                                                */
-/*   MISO = D14 (P16_2)                                                */
-/*   CS   = D18 (P16_6, GPIO-driven)                                   */
+/* SPI1 bus (external header) - SCB10 on P16_0/1/2                    */
+/*   CLK  = D3  (P16_0)                                               */
+/*   MOSI = D2  (P16_1)                                               */
+/*   MISO = D5  (P16_2)                                               */
+/*   CS   = D9  (P16_6, GPIO-driven)                                  */
 /* ------------------------------------------------------------------ */
 spi1: &scb10 {
 	#address-cells = <1>;
@@ -254,90 +254,69 @@ spi1: &scb10 {
 /* ------------------------------------------------------------------ */
 /* Arduino 'zephyr,user' node                                         */
 /*                                                                    */
-/* Digital pin mapping:                                                */
-/*   D0  = P10_7  (LED_0 / USER_LED1)                                */
-/*   D1  = P10_5  (LED_1 / USER_LED2)                                */
-/*   D2  = P20_6  (LED_RGB_RED)                                      */
-/*   D3  = P20_4  (LED_RGB_GREEN)                                    */
-/*   D4  = P20_5  (LED_RGB_BLUE)                                     */
-/*   D5  = P7_0   (SW1 / USER_BTN)                                   */
-/*   D6  = P8_0   (I2C_SCL)                                          */
-/*   D7  = P8_1   (I2C_SDA)                                          */
-/*   D8  = P21_6  (SPI_CLK)                                          */
-/*   D9  = P21_5  (SPI_MOSI)                                         */
-/*   D10 = P21_4  (SPI_MISO)                                         */
-/*   D11 = P21_7  (SPI_CS)                                           */
-/*   D20 = P17_0  (I2C1_SCL)                                         */
-/*   D21 = P17_1  (I2C1_SDA)                                         */
-/*   D22 = P17_2                                                      */
-/*   D23 = P17_3                                                      */
-/*   D24 = P17_4                                                      */
-/*   D25 = P17_5                                                      */
-/*   D26 = P17_7                                                      */
-/*   D27 = P11_1  (documented project policy: input-only usage)      */
-/*   D28 = P9_0   (SERIAL_INT0 / alternate serial signal 0)           */
-/*   D29 = P9_1   (SERIAL_INT1 / alternate serial signal 1)           */
-/*   D30 = P9_2   (SERIAL_INT2 / alternate serial signal 2)           */
-/*   D31 = P9_3   (SERIAL_INT3 / alternate serial signal 3)           */
+/* Digital pin numbers are assigned by order in digital-pin-gpios     */
+/* below (top entry is D0, then D1, etc.).                            */
 /*                                                                    */
-/* External header SPI1 mapping (SCB10):                              */
-/*   D12 = SPI1_CLK, D13 = SPI1_MOSI, D14 = SPI1_MISO, D18 = SPI1_CS */
+/* SPI1 mapping (SCB10): D3=CLK(P16_0), D2=MOSI(P16_1),               */
+/*                      D5=MISO(P16_2), D9=CS(P16_6)                  */
+/* Internal SCB3 SPI is disabled for now to free clock/divider usage. */
+/* The only exposed SPI bus is SCB10 (use Arduino SPI object).        */
 /*                                                                    */
 /* ------------------------------------------------------------------ */
 / {
 	zephyr,user {
-		digital-pin-gpios = <&gpio_prt17 5 0>,  /* D25 - P17_5       */
-				    <&gpio_prt17 7 0>,  /* D26 - P17_7       */
-				    <&gpio_prt16 1 0>,  /* D13 - P16_1       */
-				    <&gpio_prt16 0 0>,  /* D12 - P16_0       */
-				    <&gpio_prt16 3 0>,  /* D15 - P16_3       */
-				    <&gpio_prt16 2 0>,  /* D14 - P16_2       */
-				    <&gpio_prt16 5 0>,  /* D17 - P16_5       */
-				    <&gpio_prt16 4 0>,  /* D16 - P16_4       */
-				    <&gpio_prt16 7 0>,  /* D19 - P16_7       */
-				    <&gpio_prt16 6 0>,  /* D18 - P16_6       */
-				    <&gpio_prt11 1 0>,  /* D27 - P11_1 (input only) */
-				    <&gpio_prt17 4 0>,  /* D24 - P17_4       */
-				    <&gpio_prt17 2 0>,  /* D22 - P17_2       */
-				    <&gpio_prt17 3 0>,  /* D23 - P17_3       */
-				    <&gpio_prt17 0 0>,  /* D20 - I2C1_SCL    */
-				    <&gpio_prt17 1 0>,  /* D21 - I2C1_SDA    */
+		digital-pin-gpios = <&gpio_prt17 5 0>,  /* D0  - P17_5       */
+				    <&gpio_prt17 7 0>,  /* D1  - P17_7       */
+				    <&gpio_prt16 1 0>,  /* D2  - P16_1       */
+				    <&gpio_prt16 0 0>,  /* D3  - P16_0       */
+				    <&gpio_prt16 3 0>,  /* D4  - P16_3       */
+				    <&gpio_prt16 2 0>,  /* D5  - P16_2       */
+				    <&gpio_prt16 5 0>,  /* D6  - P16_5       */
+				    <&gpio_prt16 4 0>,  /* D7  - P16_4       */
+				    <&gpio_prt16 7 0>,  /* D8  - P16_7       */
+				    <&gpio_prt16 6 0>,  /* D9  - P16_6       */
+				    <&gpio_prt11 1 0>,  /* D10 - P11_1 (input only) */
+				    <&gpio_prt17 4 0>,  /* D11 - P17_4       */
+				    <&gpio_prt17 2 0>,  /* D12 - P17_2       */
+				    <&gpio_prt17 3 0>,  /* D13 - P17_3       */
+				    <&gpio_prt17 0 0>,  /* D14 - P17_0       */
+				    <&gpio_prt17 1 0>,  /* D15 - P17_1       */
 
-				    <&gpio_prt9  3 0>,  /* D31 - P9_3 / SERIAL_INT3 */
-				    <&gpio_prt9  2 0>,  /* D30 - P9_2 / SERIAL_INT2 */
-				    <&gpio_prt9  1 0>,  /* D29 - P9_1 / SERIAL_INT1 */
-				    <&gpio_prt9  0 0>,  /* D28 - P9_0 / SERIAL_INT0 */
+				    <&gpio_prt9  3 0>,  /* D16 - P9_3 / SERIAL_INT3 */
+				    <&gpio_prt9  2 0>,  /* D17 - P9_2 / SERIAL_INT2 */
+				    <&gpio_prt9  1 0>,  /* D18 - P9_1 / SERIAL_INT1 */
+				    <&gpio_prt9  0 0>,  /* D19 - P9_0 / SERIAL_INT0 */
 
-				    <&gpio_prt15 0 0>,  /* D32 - P15_0 - A0  */
-				    <&gpio_prt15 1 0>,  /* D33 - P15_1 - A1  */
-				    <&gpio_prt15 2 0>,  /* D34 - P15_2 - A2  */
-				    <&gpio_prt15 3 0>,  /* D35 - P15_3 - A3  */
-				    <&gpio_prt15 4 0>,  /* D36 - P15_4 - A4  */
-				    <&gpio_prt15 5 0>,  /* D37 - P15_5 - A5  */
-				    <&gpio_prt15 6 0>,  /* D38 - P15_6 - A6  */
-				    <&gpio_prt15 7 0>,  /* D39 - P15_7 - A7  */
+				    <&gpio_prt15 0 0>,  /* D20 - P15_0 - A0  */
+				    <&gpio_prt15 1 0>,  /* D21 - P15_1 - A1  */
+				    <&gpio_prt15 2 0>,  /* D22 - P15_2 - A2  */
+				    <&gpio_prt15 3 0>,  /* D23 - P15_3 - A3  */
+				    <&gpio_prt15 4 0>,  /* D24 - P15_4 - A4  */
+				    <&gpio_prt15 5 0>,  /* D25 - P15_5 - A5  */
+				    <&gpio_prt15 6 0>,  /* D26 - P15_6 - A6  */
+				    <&gpio_prt15 7 0>,  /* D27 - P15_7 - A7  */
 
-				    <&gpio_prt13 0 0>,  /* D40 - P13_0 - A8  */
-				    <&gpio_prt13 1 0>,  /* D41 - P13_1 - A9  */
-				    <&gpio_prt13 2 0>,  /* D42 - P13_2 - A10 */
-				    <&gpio_prt13 3 0>,  /* D43 - P13_3 - A11 */
-				    <&gpio_prt13 4 0>,  /* D44 - P13_4 - A12 */
-				    <&gpio_prt13 5 0>,  /* D45 - P13_5 - A13 */
-				    <&gpio_prt13 6 0>,  /* D46 - P13_6 - A14 */
-				    <&gpio_prt13 7 0>,  /* D47 - P13_7 - A15 */
+				    <&gpio_prt13 0 0>,  /* D28 - P13_0 - A8  */
+				    <&gpio_prt13 1 0>,  /* D29 - P13_1 - A9  */
+				    <&gpio_prt13 2 0>,  /* D30 - P13_2 - A10 */
+				    <&gpio_prt13 3 0>,  /* D31 - P13_3 - A11 */
+				    <&gpio_prt13 4 0>,  /* D32 - P13_4 - A12 */
+				    <&gpio_prt13 5 0>,  /* D33 - P13_5 - A13 */
+				    <&gpio_prt13 6 0>,  /* D34 - P13_6 - A14 */
+				    <&gpio_prt13 7 0>,  /* D35 - P13_7 - A15 */
 
-				    <&gpio_prt10 7 0>,  /* LED_0       */
-				    <&gpio_prt10 5 0>,  /* LED_1       */
-				    <&gpio_prt20 6 0>,  /* LED_RGB_RED */
-				    <&gpio_prt20 4 0>,  /* LED_RGB_GRN */
-				    <&gpio_prt20 5 0>,  /* LED_RGB_BLU */
-				    <&gpio_prt7  0 0>,  /* SW1 / BTN   */
-				    <&gpio_prt8  0 0>,  /* I2C_SCL     */
-				    <&gpio_prt8  1 0>,  /* I2C_SDA     */
-				    <&gpio_prt21 6 0>,  /* SPI_CLK     */
-				    <&gpio_prt21 5 0>,  /* SPI_MOSI    */
-				    <&gpio_prt21 4 0>,  /* SPI_MISO    */
-				    <&gpio_prt21 7 0>;  /* SPI_CS      */
+				    <&gpio_prt10 7 0>,  /* D36 - LED_0       */
+				    <&gpio_prt10 5 0>,  /* D37 - LED_1       */
+				    <&gpio_prt20 6 0>,  /* D38 - LED_RGB_RED */
+				    <&gpio_prt20 4 0>,  /* D39 - LED_RGB_GRN */
+				    <&gpio_prt20 5 0>,  /* D40 - LED_RGB_BLU */
+				    <&gpio_prt7  0 0>,  /* D41 - SW1 / BTN   */
+				    <&gpio_prt8  0 0>,  /* D42 - I2C_SCL     */
+				    <&gpio_prt8  1 0>,  /* D43 - I2C_SDA     */
+				    <&gpio_prt21 6 0>,  /* D44 - SPI_CLK     */
+				    <&gpio_prt21 5 0>,  /* D45 - SPI_MOSI    */
+				    <&gpio_prt21 4 0>,  /* D46 - SPI_MISO    */
+				    <&gpio_prt21 7 0>;  /* D47 - SPI_CS      */
 
 		builtin-led-gpios = <&gpio_prt10 7 GPIO_ACTIVE_HIGH>,  /* LED_0 (default) */
 				    <&gpio_prt10 7 GPIO_ACTIVE_HIGH>,  /* LED_0            */
@@ -346,6 +325,6 @@ spi1: &scb10 {
 
 		serials = <&uart2 &uart1>;
 		i2cs = <&i2c0 &i2c1>;
-		spis = <&spi0 &spi1>;
+		spis = <&spi1>;
 	};
 };
