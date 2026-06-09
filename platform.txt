@@ -55,8 +55,7 @@ build.boot_mode=wait
 upload.extension=elf-zsk.bin
 
 build.ldscript.path={runtime.platform.path}/variants/_ldscripts
-compiler.zephyr.specs=--specs=nano.specs --specs=nosys.specs
-build.link_command="{compiler.path}{compiler.c.elf.cmd}" "-L{build.path}" "-L{build.variant.path}" {compiler.c.elf.flags} {compiler.c.elf.extra_flags} {build.extra_flags} {build.extra_ldflags} {compiler.zephyr.common_ldflags} {compiler.zephyr.specs} {compiler.ldflags} {object_files} -Wl,--start-group "{build.path}/{archive_file}" {compiler.zephyr.extra_ldflags} {compiler.libraries.ldflags} -Wl,--end-group {build.link_args.{build.link_mode}}
+build.link_command="{compiler.path}{compiler.c.elf.cmd}" "-L{build.path}" "-L{build.variant.path}" {compiler.c.elf.flags} {compiler.c.elf.extra_flags} {build.extra_flags} {build.extra_ldflags} {compiler.zephyr.common_ldflags} --specs=nano.specs --specs=nosys.specs {compiler.ldflags} {object_files} -Wl,--start-group "{build.path}/{archive_file}" {compiler.zephyr.extra_ldflags} {compiler.libraries.ldflags} -Wl,--end-group {build.link_args.{build.link_mode}}
 
 build.check_command-dynamic={build.link_command} {build.link_args.check-dynamic} -o "{build.path}/{build.project_name}_check.tmp"
 build.check_command-static=true
@@ -164,24 +163,26 @@ pluggable_monitor.required.serial=builtin:serial-monitor
 
 # Uploader tools
 # --------------
+
 #
-# OpenOCD (Infineon, for PSOC Edge and other Infineon boards requiring KitProg3)
-# Distributed as a separate tool package: openocd
-# Scripts and interface/target configs are inside the tool package.
-# qspi_config.cfg must be present in the variant directory (copied there by setup).
+# OpenOCD
 #
-tools.openocd.path={runtime.tools.openocd.path}
+tools.openocd.path={runtime.tools.openocd-0.12.0-arduino1-static.path}
 tools.openocd.cmd=bin/openocd
 tools.openocd.cmd.windows=bin/openocd.exe
+
 tools.openocd.upload.params.verbose=-d2
 tools.openocd.upload.params.quiet=-d0
-tools.openocd.upload.pattern="{path}/{cmd}" {upload.verbose} -s "{path}/scripts/" -s "{runtime.platform.path}/variants/{build.variant}/" -f "{runtime.platform.path}/variants/{build.variant}/openocd.cfg" -c "telnet_port disabled; init; reset init; halt; adapter speed 10000; flash write_image erase {build.path}/{build.project_name}.{upload.extension} {upload.address} bin; reset run; shutdown"
+tools.openocd.upload.pattern="{path}/{cmd}" {upload.verbose} -s "{path}/share/openocd/scripts/" {upload.programmer} {upload.config} -c "telnet_port disabled; init; reset init; halt; adapter speed 10000; flash write_image erase {{build.path}/{build.project_name}.{upload.extension}} {upload.address} bin; reset run; shutdown"
+
 tools.openocd.program.params.verbose=-d2
 tools.openocd.program.params.quiet=-d0
-tools.openocd.program.pattern="{path}/{cmd}" {program.verbose} -s "{path}/scripts/" -s "{runtime.platform.path}/variants/{build.variant}/" -f "{runtime.platform.path}/variants/{build.variant}/openocd.cfg" -c "telnet_port disabled; init; reset init; halt; adapter speed 10000; flash write_image erase {build.path}/{build.project_name}.{upload.extension} {upload.address} bin; reset run; shutdown"
+tools.openocd.program.pattern="{path}/{cmd}" {program.verbose} -s "{path}/share/openocd/scripts/" {upload.programmer} {upload.config} -c "telnet_port disabled; init; reset init; halt; adapter speed 10000; flash write_image erase {{build.path}/{build.project_name}.{upload.extension}} {upload.address} bin; reset run; shutdown"
+
 tools.openocd.erase.params.verbose=-d2
 tools.openocd.erase.params.quiet=-d0
 tools.openocd.erase.pattern=
+
 tools.openocd.bootloader.params.verbose=-d2
 tools.openocd.bootloader.params.quiet=-d0
 tools.openocd.bootloader.pattern="{path}/{cmd}" {bootloader.verbose} -s "{path}/share/openocd/scripts/" {upload.programmer} {upload.config} -c "telnet_port disabled; init; reset init; halt; adapter speed 10000; program {{runtime.platform.path}/firmwares/{bootloader.file}}; reset run; shutdown"
