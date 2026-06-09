@@ -208,6 +208,8 @@ spi1: &scb10 {
 	compatible = "infineon,spi";
 	status = "okay";
 
+	spi-max-frequency = <1000000>;
+	
 	clocks = <&peri0_group1_16bit_2>;
 
 	pinctrl-0 = <&p16_1_scb10_spi_m_mosi &p16_2_scb10_spi_m_miso
