@@ -17,13 +17,13 @@ compiler.warning_flags.all=-Wall -Wextra
 
 compiler.path={build.compiler_path}
 compiler.c.cmd={build.crossprefix}gcc
-compiler.c.flags=-g -Os -c {compiler.define} {compiler.warning_flags} {compiler.zephyr.macros} "@{compiler.zephyr.cflags_file}" -fdata-sections -ffunction-sections -MMD -mcpu={build.mcu} {build.float-abi} {build.fpu}
+compiler.c.flags=-g -Os -c {compiler.define} {compiler.warning_flags} {compiler.zephyr.macros} "@{compiler.zephyr.machine_flags_file}" "@{compiler.zephyr.cflags_file}" -fdata-sections -ffunction-sections -MMD
 compiler.c.elf.cmd={build.crossprefix}g++
-compiler.c.elf.flags=-Wl,--gc-sections -mcpu={build.mcu} {build.float-abi} {build.fpu} -std=gnu++17
+compiler.c.elf.flags=-Wl,--gc-sections "@{compiler.zephyr.machine_flags_file}" -std=gnu++17
 compiler.S.cmd={build.crossprefix}g++
-compiler.S.flags=-c -x assembler-with-cpp -mcpu={build.mcu} {build.fpu}
+compiler.S.flags=-c -x assembler-with-cpp "@{compiler.zephyr.machine_flags_file}"
 compiler.cpp.cmd={build.crossprefix}g++
-compiler.cpp.flags=-g -Os -std=gnu++17 -c {compiler.define} {compiler.warning_flags} {compiler.zephyr.macros} "@{compiler.zephyr.cxxflags_file}" {compiler.zephyr.common_ldflags} {compiler.zephyr.extra_ldflags} {compiler.zephyr.common_cxxflags} {compiler.zephyr.extra_cxxflags} -MMD -mcpu={build.mcu} {build.float-abi} {build.fpu}
+compiler.cpp.flags=-g -Os -std=gnu++17 -c {compiler.define} {compiler.warning_flags} {compiler.zephyr.macros} "@{compiler.zephyr.machine_flags_file}" "@{compiler.zephyr.cxxflags_file}" {compiler.zephyr.common_ldflags} {compiler.zephyr.extra_ldflags} {compiler.zephyr.common_cxxflags} {compiler.zephyr.extra_cxxflags} -MMD
 compiler.ar.cmd={build.crossprefix}ar
 compiler.ar.flags=rcs
 compiler.objcopy.cmd=
@@ -37,6 +37,7 @@ compiler.size.cmd={build.crossprefix}size
 compiler.define=-D_PICOLIBC_CTYPE_SMALL=1
 
 compiler.zephyr.includes_file={build.variant.path}/includes.txt
+compiler.zephyr.machine_flags_file={build.variant.path}/machine_flags.txt
 compiler.zephyr.cflags_file={build.variant.path}/cflags.txt
 compiler.zephyr.cxxflags_file={build.variant.path}/cxxflags.txt
 compiler.zephyr.macros="-imacros{build.variant.path}/llext-edk/include/zephyr/include/generated/zephyr/autoconf.h" "-imacros{build.variant.path}/llext-edk/include/zephyr/include/zephyr/toolchain/zephyr_stdint.h"
@@ -54,8 +55,7 @@ build.boot_mode=wait
 upload.extension=elf-zsk.bin
 
 build.ldscript.path={runtime.platform.path}/variants/_ldscripts
-compiler.zephyr.specs=--specs=nano.specs --specs=nosys.specs
-build.link_command="{compiler.path}{compiler.c.elf.cmd}" "-L{build.path}" "-L{build.variant.path}" {compiler.c.elf.flags} {compiler.c.elf.extra_flags} {build.extra_flags} {build.extra_ldflags} {compiler.zephyr.common_ldflags} {compiler.zephyr.specs} {compiler.ldflags} {object_files} -Wl,--start-group "{build.path}/{archive_file}" {compiler.zephyr.extra_ldflags} {compiler.libraries.ldflags} -Wl,--end-group {build.link_args.{build.link_mode}}
+build.link_command="{compiler.path}{compiler.c.elf.cmd}" "-L{build.path}" "-L{build.variant.path}" {compiler.c.elf.flags} {compiler.c.elf.extra_flags} {build.extra_flags} {build.extra_ldflags} {compiler.zephyr.common_ldflags} --specs=nano.specs --specs=nosys.specs {compiler.ldflags} {object_files} -Wl,--start-group "{build.path}/{archive_file}" {compiler.zephyr.extra_ldflags} {compiler.libraries.ldflags} -Wl,--end-group {build.link_args.{build.link_mode}}
 
 build.check_command-dynamic={build.link_command} {build.link_args.check-dynamic} -o "{build.path}/{build.project_name}_check.tmp"
 build.check_command-static=true
@@ -145,9 +145,9 @@ recipe.hooks.objcopy.postobjcopy.1.pattern="{runtime.tools.zephyr-sketch-tool.pa
 recipe.hooks.objcopy.postobjcopy.2.pattern="{runtime.tools.zephyr-sketch-tool.path}/zephyr-sketch-tool" {build.zsk_args.debug} {build.zsk_args.mode-{build.link_mode}} {build.zsk_args.startup-mode-{build.boot_mode}} "{build.path}/{build.project_name}.bin"
 
 ## Compute size
-recipe.size.pattern="{compiler.path}{compiler.size.cmd}" -A "{build.path}/{build.project_name}.elf"
-recipe.size.regex.data=^(?:\.data|\.bss)\s+([0-9]+).*
-recipe.size.regex=^(?:\.data|\.text|\.rodata)\S*?\s+([0-9]+).*
+recipe.size.pattern="{runtime.tools.zephyr-check-size.path}/zephyr-check-size" {build.link_mode} "{runtime.platform.path}/firmwares/zephyr-{build.variant}.config" "{build.path}/{build.project_name}.{upload.extension}" "{build.path}/{build.project_name}.elf"
+recipe.size.regex=^\.text\s+([0-9]+).*
+recipe.size.regex.data=^\.data\s+([0-9]+).*
 
 ## Save output file
 recipe.output.tmp_file={build.project_name}.{upload.extension}
@@ -163,24 +163,26 @@ pluggable_monitor.required.serial=builtin:serial-monitor
 
 # Uploader tools
 # --------------
+
 #
-# OpenOCD (Infineon, for PSOC Edge and other Infineon boards requiring KitProg3)
-# Distributed as a separate tool package: openocd
-# Scripts and interface/target configs are inside the tool package.
-# qspi_config.cfg must be present in the variant directory (copied there by setup).
+# OpenOCD
 #
-tools.openocd.path={runtime.tools.openocd.path}
+tools.openocd.path={runtime.tools.openocd-0.12.0-arduino1-static.path}
 tools.openocd.cmd=bin/openocd
 tools.openocd.cmd.windows=bin/openocd.exe
+
 tools.openocd.upload.params.verbose=-d2
 tools.openocd.upload.params.quiet=-d0
-tools.openocd.upload.pattern="{path}/{cmd}" {upload.verbose} -s "{path}/scripts/" -s "{runtime.platform.path}/variants/{build.variant}/" -f "{runtime.platform.path}/variants/{build.variant}/openocd.cfg" -c "telnet_port disabled; init; reset init; halt; adapter speed 10000; flash write_image erase {build.path}/{build.project_name}.{upload.extension} {upload.address} bin; reset run; shutdown"
+tools.openocd.upload.pattern="{path}/{cmd}" {upload.verbose} -s "{path}/share/openocd/scripts/" {upload.programmer} {upload.config} -c "telnet_port disabled; init; reset init; halt; adapter speed 10000; flash write_image erase {{build.path}/{build.project_name}.{upload.extension}} {upload.address} bin; reset run; shutdown"
+
 tools.openocd.program.params.verbose=-d2
 tools.openocd.program.params.quiet=-d0
-tools.openocd.program.pattern="{path}/{cmd}" {program.verbose} -s "{path}/scripts/" -s "{runtime.platform.path}/variants/{build.variant}/" -f "{runtime.platform.path}/variants/{build.variant}/openocd.cfg" -c "telnet_port disabled; init; reset init; halt; adapter speed 10000; flash write_image erase {build.path}/{build.project_name}.{upload.extension} {upload.address} bin; reset run; shutdown"
+tools.openocd.program.pattern="{path}/{cmd}" {program.verbose} -s "{path}/share/openocd/scripts/" {upload.programmer} {upload.config} -c "telnet_port disabled; init; reset init; halt; adapter speed 10000; flash write_image erase {{build.path}/{build.project_name}.{upload.extension}} {upload.address} bin; reset run; shutdown"
+
 tools.openocd.erase.params.verbose=-d2
 tools.openocd.erase.params.quiet=-d0
 tools.openocd.erase.pattern=
+
 tools.openocd.bootloader.params.verbose=-d2
 tools.openocd.bootloader.params.quiet=-d0
 tools.openocd.bootloader.pattern="{path}/{cmd}" {bootloader.verbose} -s "{path}/share/openocd/scripts/" {upload.programmer} {upload.config} -c "telnet_port disabled; init; reset init; halt; adapter speed 10000; program {{runtime.platform.path}/firmwares/{bootloader.file}}; reset run; shutdown"
