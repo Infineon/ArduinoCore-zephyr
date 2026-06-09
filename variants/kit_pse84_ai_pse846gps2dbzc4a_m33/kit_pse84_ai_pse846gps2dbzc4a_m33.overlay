@@ -27,19 +27,20 @@
 /* IMPORTANT: Keep one coherent address model for both:               */
 /*   - upstream loader flash_area_read() (partition reg as flash off) */
 /*   - upstream loader runtime base math (flash0_base + reg)          */
-/* Set flash0 base to SMIF XIP window and use a true flash offset.    */
-/* Target XIP address 0x70200000 with flash0 base 0x60000000:         */
-/*   user_sketch_offset = 0x70200000 - 0x60000000 = 0x10200000        */
+/* PSE84 secure XIP uses the 0x70000000 alias for SMIF flash.         */
+/* Target sketch address is 0x70200000, so use:                       */
+/*   flash0_base = 0x70000000                                          */
+/*   user_sketch_offset = 0x00200000                                   */
 /* ------------------------------------------------------------------ */
 &flash0 {
-	reg = <0x60000000 DT_SIZE_M(64)>;
+	reg = <0x70000000 DT_SIZE_M(64)>;
         partitions {
                 compatible = "fixed-partitions";
                 #address-cells = <1>;
                 #size-cells = <1>;
 
-		user_sketch: partition@10200000 {
-			reg = <0x10200000 DT_SIZE_K(1023)>;
+		user_sketch: partition@200000 {
+			reg = <0x200000 DT_SIZE_K(1023)>;
                 };
         };
 };
