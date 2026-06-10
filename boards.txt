@@ -679,6 +679,7 @@ kit_pse84_ai.build.float-abi=-mfloat-abi=hard
 kit_pse84_ai.compiler.zephyr.specs=
 kit_pse84_ai.build.extra_flags=
 kit_pse84_ai.build.specs=
+kit_pse84_ai.build.link_command="{compiler.path}{compiler.c.elf.cmd}" "-L{build.path}" "-L{build.variant.path}" {compiler.c.elf.flags} {compiler.c.elf.extra_flags} {build.extra_flags} {build.extra_ldflags} {compiler.zephyr.common_ldflags} {compiler.ldflags} {object_files} -Wl,--start-group "{build.path}/{archive_file}" {compiler.zephyr.extra_ldflags} {compiler.libraries.ldflags} -Wl,--end-group {build.link_args.{build.link_mode}}
 kit_pse84_ai.build.postbuild.cmd="{tools.openocd.path}/{tools.openocd.cmd}" exit
 kit_pse84_ai.build.board=KIT_PSE84_AI
 kit_pse84_ai.upload.address=0x70200000
