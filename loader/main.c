@@ -17,6 +17,7 @@ LOG_MODULE_REGISTER(sketch);
 #include <zephyr/logging/log_ctrl.h>
 
 #include <stdlib.h>
+#include <string.h>
 #include <zephyr/drivers/gpio.h>
 #include <zephyr/drivers/uart.h>
 #include <zephyr/drivers/uart/cdc_acm.h>
@@ -116,6 +117,11 @@ struct backup_store {
 };
 volatile __stm32_backup_sram_section struct backup_store backup;
 
+static bool sketch_header_is_valid(const char *header) {
+	const struct sketch_header_v1 *sketch_hdr = (const struct sketch_header_v1 *)(header + 7);
+	return sketch_hdr->ver == 0x1 && sketch_hdr->magic == 0x2341;
+}
+
 static int loader(const struct shell *sh) {
 	const struct flash_area *fa;
 	int rc;
@@ -139,10 +145,37 @@ static int loader(const struct shell *sh) {
 
 	bool sketch_valid = true;
 	struct sketch_header_v1 *sketch_hdr = (struct sketch_header_v1 *)(header + 7);
-	if (sketch_hdr->ver != 0x1 || sketch_hdr->magic != 0x2341) {
-		printk("Invalid sketch header\n");
+	if (!sketch_header_is_valid(header)) {
+#if !defined(CONFIG_LLEXT_STORAGE_WRITABLE)
+		char xip_header[HEADER_LEN];
+		memcpy(xip_header, (const void *)base_addr, sizeof(xip_header));
+		if (sketch_header_is_valid(xip_header)) {
+			printk("Header mismatch via flash_area_read; using XIP header at 0x%08x\n",
+			       (unsigned int)base_addr);
+			memcpy(header, xip_header, sizeof(header));
+			sketch_hdr = (struct sketch_header_v1 *)(header + 7);
+		} else {
+			const struct sketch_header_v1 *xip_hdr =
+				(const struct sketch_header_v1 *)(xip_header + 7);
+			printk("Invalid sketch header (flash_area ver=0x%02x magic=0x%04x; xip ver=0x%02x magic=0x%04x)\n",
+			       sketch_hdr->ver, sketch_hdr->magic, xip_hdr->ver, xip_hdr->magic);
+			sketch_valid = false;
+			/* Do not continue with random flags/length; keep shell/logging alive for recovery. */
+			return -EINVAL;
+		}
+#else
+		printk("Invalid sketch header (ver=0x%02x magic=0x%04x)\n", sketch_hdr->ver,
+		       sketch_hdr->magic);
 		sketch_valid = false;
-		// This is not a valid sketch, but try to start a shell anyway
+		/* Do not continue with random flags/length; keep shell/logging alive for recovery. */
+		return -EINVAL;
+#endif
+	}
+
+	if (sketch_hdr->len < HEADER_LEN + 1 || sketch_hdr->len > sketch_max_size) {
+		printk("Invalid sketch length (%u, max %u)\n", sketch_hdr->len,
+		       (unsigned int)sketch_max_size);
+		return -EINVAL;
 	}
 
 #if ZARD_FIRST_SERIAL_IS_SERIALUSB
