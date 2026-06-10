@@ -28,11 +28,11 @@
 
 #pragma once
 
-/** SPI pin definitions (Wire = SCB3 on P21) */
-#define MOSI    45  /**< P21_5 */
-#define MISO    46  /**< P21_4 */
-#define SCK     44  /**< P21_6 */
-#define SS      47  /**< P21_7 */
+/** SPI pin definitions (default SPI = SCB10 on P16) */
+#define MOSI    2   /**< P16_1 */
+#define MISO    5   /**< P16_2 */
+#define SCK     3   /**< P16_0 */
+#define SS      9   /**< P16_6 */
 
 /** I2C pin definitions (Wire = SCB0 on P8, Wire1 = SCB5 on P17) */
 #define SDA     43  /**< P8_1  */
