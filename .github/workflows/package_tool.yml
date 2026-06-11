@@ -23,10 +23,7 @@ on:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}-${{ github.actor }}
-  # TEMP: keep parallel runs for faster iteration while builds are long.
-  # Revert by restoring the original line below.
-  # cancel-in-progress: true
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
 
