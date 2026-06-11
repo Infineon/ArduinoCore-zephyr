@@ -20,19 +20,69 @@
  *   D10 = P11_1             D22 = P15_2 - A2         D34 = P13_6 - A14
  *   D11 = P17_4             D23 = P15_3 - A3         D35 = P13_7 - A15
  *
- *   D36 = P10_7 - LED_0     D40 = P20_5 - LED_BLU   D44 = P21_6 - SPI_CLK
- *   D37 = P10_5 - LED_1     D41 = P7_0  - SW1/BTN   D45 = P21_5 - SPI_MOSI
- *   D38 = P20_6 - LED_RED   D42 = P8_0  - I2C_SCL   D46 = P21_4 - SPI_MISO
- *   D39 = P20_4 - LED_GRN   D43 = P8_1  - I2C_SDA   D47 = P21_7 - SPI_CS
+ *   D36 = P10_7 - LED_0     D40 = P20_5 - LED_BLU   D44 = P21_6 - SCB3_CLK
+ *   D37 = P10_5 - LED_1     D41 = P7_0  - SW1/BTN   D45 = P21_5 - SCB3_MOSI
+ *   D38 = P20_6 - LED_RED   D42 = P8_0  - I2C_SCL   D46 = P21_4 - SCB3_MISO
+ *   D39 = P20_4 - LED_GRN   D43 = P8_1  - I2C_SDA   D47 = P21_7 - SCB3_CS
  */
 
 #pragma once
 
+/** Digital pin aliases (indices into digital-pin-gpios) */
+#define D0              0
+#define D1              1
+#define D2              2
+#define D3              3
+#define D4              4
+#define D5              5
+#define D6              6
+#define D7              7
+#define D8              8
+#define D9              9
+#define D10             10
+#define D11             11
+#define D12             12
+#define D13             13
+#define D14             14
+#define D15             15
+#define D16             16
+#define D17             17
+#define D18             18
+#define D19             19
+#define D20             20
+#define D21             21
+#define D22             22
+#define D23             23
+#define D24             24
+#define D25             25
+#define D26             26
+#define D27             27
+#define D28             28
+#define D29             29
+#define D30             30
+#define D31             31
+#define D32             32
+#define D33             33
+#define D34             34
+#define D35             35
+#define D36             36
+#define D37             37
+#define D38             38
+#define D39             39
+#define D40             40
+#define D41             41
+#define D42             42
+#define D43             43
+#define D44             44
+#define D45             45
+#define D46             46
+#define D47             47
+
 /** SPI pin definitions (default SPI = SCB10 on P16) */
-#define MOSI    2   /**< P16_1 */
-#define MISO    5   /**< P16_2 */
-#define SCK     3   /**< P16_0 */
-#define SS      9   /**< P16_6 */
+#define MOSI    D2  /**< P16_1 */
+#define MISO    D5  /**< P16_2 */
+#define SCK     D3  /**< P16_0 */
+#define SS      D9  /**< P16_6 */
 
 /** I2C pin definitions (Wire = SCB0 on P8, Wire1 = SCB5 on P17) */
 #define SDA     43  /**< P8_1  */
