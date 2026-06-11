@@ -15,10 +15,7 @@ on:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}-${{ github.actor }}
-  # TEMP: keep parallel runs for faster iteration while builds are long.
-  # Revert by restoring the original line below.
-  # cancel-in-progress: ${{ github.event_name != 'push' || github.repository != 'arduino/ArduinoCore-zephyr' }}
-  cancel-in-progress: false
+  cancel-in-progress: ${{ github.event_name != 'push' || github.repository != 'arduino/ArduinoCore-zephyr' }}
 
 env:
   # use the head SHA for PR hashes, instead of the merge commit
