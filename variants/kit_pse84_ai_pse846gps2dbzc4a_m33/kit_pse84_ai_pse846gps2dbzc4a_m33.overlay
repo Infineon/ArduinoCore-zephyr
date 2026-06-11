@@ -13,7 +13,7 @@
  * Peripherals:
  *   UART  : SCB2  - P6_7(TX) / P6_5(RX)  (console, enabled in board DTS)
  *   I2C   : SCB0  - P8_0(SCL) / P8_1(SDA) (1.8V I2C bus)
- *   SPI   : SCB3  - P21_6(CLK) / P21_5(MOSI) / P21_4(MISO) / P21_7(CS)
+ *   SPI   : SCB10 - P16_0(CLK) / P16_1(MOSI) / P16_2(MISO) / P16_6(CS)
  *   LEDs  : P10_7(LED0) P10_5(LED1) P20_6(RED) P20_4(GREEN) P20_5(BLUE)
  *   Button: P7_0 (SW1, active-low, internal pull-up)
  */
@@ -255,7 +255,7 @@ spi1: &scb10 {
 /* Digital pin numbers are assigned by order in digital-pin-gpios     */
 /* below (top entry is D0, then D1, etc.).                            */
 /*                                                                    */
-/* SPI1 mapping (SCB10): D3=CLK(P16_0), D2=MOSI(P16_1),               */
+/* SPI mapping (SCB10): D3=CLK(P16_0), D2=MOSI(P16_1),                */
 /*                      D5=MISO(P16_2), D9=CS(P16_6)                  */
 /* Internal SCB3 SPI is disabled for now to free clock/divider usage. */
 /* The only exposed SPI bus is SCB10 (use Arduino SPI object).        */
@@ -311,10 +311,10 @@ spi1: &scb10 {
 				    <&gpio_prt7  0 0>,  /* D41 - SW1 / BTN   */
 				    <&gpio_prt8  0 0>,  /* D42 - I2C_SCL     */
 				    <&gpio_prt8  1 0>,  /* D43 - I2C_SDA     */
-				    <&gpio_prt21 6 0>,  /* D44 - SPI_CLK     */
-				    <&gpio_prt21 5 0>,  /* D45 - SPI_MOSI    */
-				    <&gpio_prt21 4 0>,  /* D46 - SPI_MISO    */
-				    <&gpio_prt21 7 0>;  /* D47 - SPI_CS      */
+				    <&gpio_prt21 6 0>,  /* D44 - SCB3_CLK    */
+				    <&gpio_prt21 5 0>,  /* D45 - SCB3_MOSI   */
+				    <&gpio_prt21 4 0>,  /* D46 - SCB3_MISO   */
+				    <&gpio_prt21 7 0>;  /* D47 - SCB3_CS     */
 
 		builtin-led-gpios = <&gpio_prt10 7 GPIO_ACTIVE_HIGH>,  /* LED_0 (default) */
 				    <&gpio_prt10 7 GPIO_ACTIVE_HIGH>,  /* LED_0            */
