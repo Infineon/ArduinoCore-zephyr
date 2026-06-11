@@ -43,6 +43,11 @@
               "packager": "zephyr",
               "name": "arm-zephyr-eabi",
               "version": "1.0.1"
+            },
+            {
+              "packager": "arduino",
+              "name": "zephyr-check-size",
+              "version": "0.1.0"
             }
           ]
         }
