@@ -196,7 +196,7 @@ spi0: &scb3 {
 };
 
 /* ------------------------------------------------------------------ */
-/* SPI1 bus (external header) - SCB10 on P16_0/1/2                    */
+/* SPI bus (external header) - SCB10 on P16_0/1/2                     */
 /*   CLK  = D3  (P16_0)                                               */
 /*   MOSI = D2  (P16_1)                                               */
 /*   MISO = D5  (P16_2)                                               */
