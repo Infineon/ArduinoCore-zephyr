@@ -217,7 +217,6 @@ spi1: &scb10 {
 
 &peri0_group1_16bit_2 {
 	status = "okay";
-	clock-div = <1>;
 };
 
 &p21_5_scb3_spi_m_mosi {
