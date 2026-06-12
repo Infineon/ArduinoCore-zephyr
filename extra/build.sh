@@ -104,9 +104,12 @@ perl -i -pe "s/${c_comment}//gs unless /${line_preproc_ok}/ || (/${line_comment_
 
 for ext in elf bin hex; do
     rm -f firmwares/zephyr-$variant.$ext
-    if [ -f ${BUILD_DIR}/zephyr/zephyr.$ext ]; then
-        cp ${BUILD_DIR}/zephyr/zephyr.$ext firmwares/zephyr-$variant.$ext
-    fi
+	if [ "$ext" = "hex" ] && [ -f ${BUILD_DIR}/zephyr/zephyr.signed.hex ]; then
+		# Prefer signed HEX when available (for PSE84) for bootloader programming.
+		cp ${BUILD_DIR}/zephyr/zephyr.signed.hex firmwares/zephyr-$variant.hex
+	elif [ -f ${BUILD_DIR}/zephyr/zephyr.$ext ]; then
+		cp ${BUILD_DIR}/zephyr/zephyr.$ext firmwares/zephyr-$variant.$ext
+	fi
 done
 cp ${BUILD_DIR}/zephyr/zephyr.dts firmwares/zephyr-$variant.dts
 cp ${BUILD_DIR}/zephyr/.config firmwares/zephyr-$variant.config
