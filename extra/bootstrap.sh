@@ -67,20 +67,15 @@ else
   log_msg "group" "Refreshing workspace and modules: $HAL_FILTER"
 fi
 west config manifest.project-filter -- "$HAL_FILTER"
-west update $WEST_MODULES_CACHE "$@"
+west update "$@"
 bash ./extra/apply_zephyr_patches.sh
 west zephyr-export
 pip3 install -r ../zephyr/scripts/requirements-base.txt
 log_msg "endgroup"
 
-TOOLCHAIN_VERSIONS=$(for tc in $NEEDED_TOOLCHAINS; do
-  version=$(jq -r --arg name "$tc" '.toolsDependencies[] | select(.name == $name) | .version' extra/artifacts/_common.json)
-  if [ -z "$version" ]; then
-    echo "No version found for toolchain '$tc' in extra/artifacts/_common.json" >&2
-    exit 1
-  fi
-  echo "$version $tc"
-done | sort -V)
+log_msg "group" "Installing Zephyr SDK 1.0.1"
+west sdk install --version 1.0.1 -t arm-zephyr-eabi
+log_msg "endgroup"
 
 for version in $(echo "$TOOLCHAIN_VERSIONS" | cut -d ' ' -f 1 | sort -u -V); do
   toolchains=$(echo "$TOOLCHAIN_VERSIONS" | awk -v v="$version" '$1 == v { print $2 }')
