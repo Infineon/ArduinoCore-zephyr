@@ -1,0 +1,14 @@
+package-name: arduinocore-zephyr-pse84
+include:
+    - cores
+    - libraries
+    - variants
+    - boards.txt
+    - platform.txt
+    - LICENSE
+    - README.md
+index-name: package_infineon_pse84_index
+server:
+    type: github
+    owner: michal-gora
+    repo: ArduinoCore-zephyr
