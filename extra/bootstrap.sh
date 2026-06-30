@@ -68,6 +68,7 @@ else
 fi
 west config manifest.project-filter -- "$HAL_FILTER"
 west update $WEST_MODULES_CACHE "$@"
+bash ./extra/apply_zephyr_patches.sh
 west zephyr-export
 pip3 install -r ../zephyr/scripts/requirements-base.txt
 log_msg "endgroup"

@@ -31,6 +31,14 @@ Install the core and its toolchains via Board Manager:
 * Open the *'Boards Manager'* from the side menu and search for *'Zephyr'*.
 * Install the *'Arduino Zephyr Boards'* platform (or the *'Arduino Uno Q Board'* platform if you have an Arduino UNO Q).
 
+### PSOC Edge
+
+To install the PSE84 package, add its `package_infineon_pse84_index.json` release URL in *'Settings / Preferences'* under *'Additional boards manager URLs'*, then search for and install *'Infineon PSOC Edge Boards'* in the *'Boards Manager'*. Alternatively, install it with:
+
+```bash
+arduino-cli core install infineon:zephyr_pse84 --additional-urls https://github.com/michal-gora/ArduinoCore-zephyr/releases/latest/download/package_infineon_pse84_index.json
+```
+
 ## 🏗️ First Use
 
 The first time you use a Zephyr board, the *Zephyr loader* must be installed on
