@@ -39,6 +39,27 @@ To install the PSE84 package, add its `package_infineon_pse84_index.json` releas
 arduino-cli core install infineon:zephyr_pse84 --additional-urls https://github.com/michal-gora/ArduinoCore-zephyr/releases/latest/download/package_infineon_pse84_index.json
 ```
 
+### PSE84 API Coverage
+
+| Area | Status | Notes |
+| --- | --- | --- |
+| Sketch lifecycle (`setup`, `loop`) | Supported | Core runtime is present and used by samples. |
+| Timing (`millis`, `micros`, `delay`, `yield`) | Supported | Implemented in Zephyr-backed core code. |
+| Digital GPIO (`pinMode`, `digitalRead`, `digitalWrite`) | Supported | Implemented in core. |
+| Interrupts (`attachInterrupt`, `detachInterrupt`) | Supported | Implemented in core. |
+| Analog input (`analogRead`) | Not supported | |
+| Analog output (`analogWrite`) | Not supported | |
+| UART Serial | Supported | Zephyr UART-backed serial is implemented. |
+| USB Serial | Not supported | The current board configuration is non-native USB for sketch upload/runtime serial. |
+| SPI | Not supported | |
+| I2C (`Wire`) | Supported | |
+| Threads (`Thread`) | Not supported | |
+| CAN, Ethernet, RTC, WiFi | Not supported | These libraries are skipped for this board. |
+
+### PSE84 Development
+
+The PSE84 port uses Zephyr with a board-specific loader. Its board definition, variant files, and upload tooling are in [boards.txt](boards.txt) and [variants/kit_pse84_ai_pse846gps2dbzc4a_m33](variants/kit_pse84_ai_pse846gps2dbzc4a_m33). Validate small samples such as `blinky`, `hello`, and `threads` before extending subsystem-specific libraries.
+
 ## 🏗️ First Use
 
 The first time you use a Zephyr board, the *Zephyr loader* must be installed on
