@@ -113,28 +113,23 @@ jobs:
           run-id: ${{ github.event.workflow_run.id }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Normalize artifact filename for release tag
+      - name: Create PSE84-only release archive
         run: |
           if [ -z "${TAG}" ]; then
             echo "Release tag is empty" >&2
             exit 1
           fi
 
-          TAR_FILE=$(ls release-assets/ArduinoCore-zephyr_contrib-*.tar.bz2 | head -n1)
+          TAR_FILE=$(find release-assets -maxdepth 1 -name 'ArduinoCore-zephyr_contrib-*.tar.bz2' -print -quit)
           if [ -z "${TAR_FILE}" ]; then
             echo "Downloaded artifact does not contain expected tarball" >&2
             exit 1
           fi
 
-          OLD_BASENAME=$(basename "${TAR_FILE}")
-          NEW_BASENAME="ArduinoCore-zephyr_contrib-${TAG}.tar.bz2"
-
-          if [ "${OLD_BASENAME}" != "${NEW_BASENAME}" ]; then
-            mv "${TAR_FILE}" "release-assets/${NEW_BASENAME}"
-            echo "Renamed ${OLD_BASENAME} -> ${NEW_BASENAME}"
-          fi
-
-          echo "TAR_BASENAME=${NEW_BASENAME}" >> "$GITHUB_ENV"
+          TAR_BASENAME="ArduinoCore-zephyr_pse84-${TAG}.tar.bz2"
+          ./extra/package_pse84_release.sh "${TAR_FILE}" "release-assets/${TAR_BASENAME}"
+          rm -f "${TAR_FILE}"
+          echo "TAR_BASENAME=${TAR_BASENAME}" >> "$GITHUB_ENV"
 
       - name: Generate package index JSON
         run: |
