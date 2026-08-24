@@ -36,7 +36,7 @@ jobs:
       # User-friendly SemVer-compatible version for the build. Matches the tag
       # name if building a tagged commit, otherwise it is "slightly more" than
       # the latest tag.
-      CORE_VER: ${{ env.CORE_VER }}
+      CORE_VER: ${{ steps.identify-core.outputs.CORE_VER }}
       # Tag (if found) or hash identifying this core build, should be used for
       # user-friendly strings and file names
       CORE_TAG: ${{ env.CORE_TAG }}
@@ -73,11 +73,14 @@ jobs:
           fetch-tags: true # needed for get_core_version.sh
 
       - name: Identify current version and board set
+        id: identify-core
         run: |
           # Set up basic environment for later steps
+          CORE_VER=$(extra/get_core_version.sh)
           echo "CORE_HASH=$(git describe --always $HEAD_REF)" >> "$GITHUB_ENV"
           echo "ALL_BOARD_DATA=$(extra/get_board_details.sh | jq -c 'sort_by(.variant)')" >> "$GITHUB_ENV"
-          echo "CORE_VER=$(extra/get_core_version.sh)" >> "$GITHUB_ENV"
+          echo "CORE_VER=${CORE_VER}" >> "$GITHUB_ENV"
+          echo "CORE_VER=${CORE_VER}" >> "$GITHUB_OUTPUT"
 
       - name: Map output packages
         # needs the above env vars
@@ -114,8 +117,12 @@ jobs:
           (cd && tar cphf - .cmake work zephyr-sdk-* | zstd > build-env.tar.zstd)
 
       - name: Get ci-builds package index link
-        if: ${{ github.repository == 'arduino/ArduinoCore-zephyr' }}
         run: |
+          if [ "${{ github.repository }}" != "arduino/ArduinoCore-zephyr" ]; then
+            echo "CI_BUILDS_URL=https://arduino.github.io/core-ci-builds/package_arduino_zephyr_main_ci_index.json" >> "$GITHUB_ENV"
+            exit 0
+          fi
+
           # for pull requests and pushes to the official Arduino repo, use the latest ci-built core as a reference
           CI_BUILDS_URL="https://arduino.github.io/core-ci-builds/package_arduino_zephyr_${CORE_BRANCH}_ci_index.json"
           if ! wget -q --method=HEAD "$CI_BUILDS_URL" >& /dev/null ; then
@@ -164,6 +171,8 @@ jobs:
     needs:
       - build-env
     env:
+      # Reuse the tagged version computed by build-env in restored workspaces.
+      PINNED_CORE_VERSION: ${{ needs.build-env.outputs.CORE_VER }}
       # ccache, don't look for the spec file anywhere
       CCACHE_IGNOREOPTIONS: -specs=*
       # build-specific name of the generated artifacts
@@ -493,21 +502,6 @@ jobs:
         run: |
           tar xf ${CORE_ARTIFACT} # will create ArduinoCore-zephyr/
           echo "REPORT_FILE=$(echo ${FQBN} | tr ':' '-').json" >> $GITHUB_ENV
-
-      - name: Install arm-zephyr-eabi 1.0.1 for zephyr_contrib boards
-        # zephyr_contrib boards (e.g. kit_pse84_ai) use Zephyr 4.4.0 + SDK 1.0.1.
-        # The Board Manager only ships arm-zephyr-eabi-0.16.8 (for SDK 0.16.8/Zephyr 4.2.0).
-        # We install 1.0.1 manually into the arduino-cli packages path so that
-        # {runtime.tools.arm-zephyr-eabi-1.0.1.path} resolves correctly during compilation.
-        if: ${{ matrix.subarch == 'zephyr_contrib' }}
-        run: |
-          TOOL_DIR=~/.arduino15/packages/zephyr/tools/arm-zephyr-eabi/1.0.1
-          if [ ! -d "$TOOL_DIR/bin" ]; then
-            mkdir -p "$TOOL_DIR"
-            wget -q https://github.com/zephyrproject-rtos/sdk-ng/releases/download/v1.0.1/toolchain_gnu_linux-x86_64_arm-zephyr-eabi.tar.xz -O /tmp/arm-zephyr-eabi.tar.xz
-            tar -xf /tmp/arm-zephyr-eabi.tar.xz -C "$TOOL_DIR" --strip-components=1
-            rm /tmp/arm-zephyr-eabi.tar.xz
-          fi
 
       - name: Get test sketches
         run: |
