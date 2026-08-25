@@ -45,23 +45,23 @@
 | `sq()` | Math | ✅ |
 | `sqrt()` | Math | ✅ |
 | **Trigonometry** |  |  |
-| `cos()` | Math | ⚠️ |
-| `sin()` | Math | ⚠️ |
-| `tan()` | Math | ⚠️ |
+| `cos()` | Math | ✅ |
+| `sin()` | Math | ✅ |
+| `tan()` | Math | ✅ |
 | **Characters** |  |  |
-| `isAlpha()` | Characters | ⚠️ |
-| `isAlphaNumeric()` | Characters | ⚠️ |
-| `isAscii()` | Characters | ⚠️ |
-| `isControl()` | Characters | ⚠️ |
-| `isDigit()` | Characters | ⚠️ |
-| `isGraph()` | Characters | ⚠️ |
-| `isHexadecimalDigit()` | Characters | ⚠️ |
-| `isLowerCase()` | Characters | ⚠️ |
-| `isPrintable()` | Characters | ⚠️ |
-| `isPunct()` | Characters | ⚠️ |
-| `isSpace()` | Characters | ⚠️ |
-| `isUpperCase()` | Characters | ⚠️ |
-| `isWhitespace()` | Characters | ⚠️ |
+| `isAlpha()` | Characters | ✅ |
+| `isAlphaNumeric()` | Characters | ✅ |
+| `isAscii()` | Characters | ✅ |
+| `isControl()` | Characters | ✅ |
+| `isDigit()` | Characters | ✅ |
+| `isGraph()` | Characters | ✅ |
+| `isHexadecimalDigit()` | Characters | ✅ |
+| `isLowerCase()` | Characters | ✅ |
+| `isPrintable()` | Characters | ✅ |
+| `isPunct()` | Characters | ✅ |
+| `isSpace()` | Characters | ✅ |
+| `isUpperCase()` | Characters | ✅ |
+| `isWhitespace()` | Characters | ✅ |
 | **Random Numbers** |  |  |
 | `random()` | Random | ✅ |
 | `randomSeed()` | Random | ✅ |
