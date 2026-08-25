@@ -36,14 +36,14 @@
 | `millis()` | Timing | ✅ |
 | `micros()` | Timing | ✅ |
 | **Math** |  |  |
-| `abs()` | Math | ⚠️ |
-| `constrain()` | Math | ⚠️ |
-| `map()` | Math | ⚠️ |
-| `max()` | Math | ⚠️ |
-| `min()` | Math | ⚠️ |
-| `pow()` | Math | ⚠️ |
-| `sq()` | Math | ⚠️ |
-| `sqrt()` | Math | ⚠️ |
+| `abs()` | Math | ✅ |
+| `constrain()` | Math | ✅ |
+| `map()` | Math | ✅ |
+| `max()` | Math | ✅ |
+| `min()` | Math | ✅ |
+| `pow()` | Math | ✅ |
+| `sq()` | Math | ✅ |
+| `sqrt()` | Math | ✅ |
 | **Trigonometry** |  |  |
 | `cos()` | Math | ⚠️ |
 | `sin()` | Math | ⚠️ |
