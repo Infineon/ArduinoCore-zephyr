@@ -23,6 +23,7 @@ for BOARD in $(get_boards); do
 	HALS=$(get_board_field $BOARD "build\\.zephyr_hals")
 	ARTIFACT=$(get_board_field $BOARD "build\\.artifact")
 	ARTIFACT=${ARTIFACT:-zephyr_contrib}
+	FEATURE_BOARD=$(get_board_field $BOARD "build\\.feature_board")
 	UPLOAD_OFFSET=$(get_board_field $BOARD "upload\\.offset")
 
 	ARTIFACT_JSON=extra/artifacts/$ARTIFACT.json
@@ -50,6 +51,7 @@ for BOARD in $(get_boards); do
 	  "args": "$ARGS",
 	  "hals": "$HALS",
 	  "artifact": "$ARTIFACT",
+	  "feature_board": ${FEATURE_BOARD:-false},
 	  "subarch": "$SUBARCH",
 	  "upload_offset": "$UPLOAD_OFFSET"
 	}
