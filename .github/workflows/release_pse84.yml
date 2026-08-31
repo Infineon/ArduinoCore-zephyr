@@ -127,7 +127,7 @@ jobs:
           fi
 
           TAR_BASENAME="ArduinoCore-zephyr_pse84-${TAG}.tar.bz2"
-          ./extra/package_pse84_release.sh "${TAR_FILE}" "release-assets/${TAR_BASENAME}"
+          ./extra/package_release_group.sh pse84 "${TAR_FILE}" "release-assets/${TAR_BASENAME}"
           rm -f "${TAR_FILE}"
           echo "TAR_BASENAME=${TAR_BASENAME}" >> "$GITHUB_ENV"
 
