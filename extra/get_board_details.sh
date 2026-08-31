@@ -25,6 +25,7 @@ for BOARD in $(get_boards); do
 	ARTIFACT=${ARTIFACT:-zephyr_contrib}
 	FEATURE_BOARD=$(get_board_field $BOARD "build\\.feature_board")
 	RELEASE_GROUP=$(get_board_field $BOARD "build\\.release_group")
+	PATCH_GROUP=$(get_board_field $BOARD "build\\.patch_group")
 	UPLOAD_OFFSET=$(get_board_field $BOARD "upload\\.offset")
 
 	ARTIFACT_JSON=extra/artifacts/$ARTIFACT.json
@@ -54,6 +55,7 @@ for BOARD in $(get_boards); do
 	  "artifact": "$ARTIFACT",
 	  "feature_board": ${FEATURE_BOARD:-false},
 	  "release_group": "$RELEASE_GROUP",
+	  "patch_group": "$PATCH_GROUP",
 	  "subarch": "$SUBARCH",
 	  "upload_offset": "$UPLOAD_OFFSET"
 	}
