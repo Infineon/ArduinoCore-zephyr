@@ -60,7 +60,7 @@ jobs:
 
       - name: Apply Zephyr patches
         run: |
-          bash $MODULE_PATH/extra/apply_zephyr_patches.sh
+          bash $MODULE_PATH/extra/apply_zephyr_patches.sh pse84
 
       - name: Build PSE84 blinky
         run: |

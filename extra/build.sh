@@ -9,10 +9,6 @@ source venv/bin/activate
 
 ZEPHYR_BASE=$(west topdir)/zephyr
 
-# Ensure Zephyr patch set is applied even for incremental builds where
-# bootstrap.sh was not re-run.
-bash ./extra/apply_zephyr_patches.sh
-
 if [ x$ZEPHYR_SDK_INSTALL_DIR == x"" ]; then
 	SDK_PATH=$(west sdk list | grep path | tail -n 1 | cut -d ':' -f 2 | tr -d ' ')
 	if [ x$SDK_PATH == x ]; then
@@ -75,6 +71,12 @@ else
 		log_msg warning "No board for '$target' defined in 'boards.txt'. A proper definition is required to use the core."
 	fi
 fi
+
+# Ensure Zephyr patch set is applied even for incremental builds where
+# bootstrap.sh was not re-run. Scoped to this board's patch group so an
+# unrelated board's patches are never applied here.
+patch_group=$(jq -cr '.patch_group // empty' <<< "${chosen_board:-null}")
+bash ./extra/apply_zephyr_patches.sh "$patch_group"
 
 # Save the build version to loader/VERSION and for later use in local files
 build_version=$(extra/get_core_version.sh loader/VERSION)
