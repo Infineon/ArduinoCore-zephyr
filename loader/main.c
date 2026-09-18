@@ -127,6 +127,7 @@ struct backup_store {
 extern volatile __stm32_backup_sram_section struct backup_store backup;
 
 static int loader(const struct shell *sh) {
+#if defined(CONFIG_FLASH_MAP)
 	const struct flash_area *fa;
 	int rc;
 
@@ -136,6 +137,7 @@ static int loader(const struct shell *sh) {
 		printk("Failed to open flash area, rc %d\n", rc);
 		return rc;
 	}
+#endif
 
 #if defined(CONFIG_OTA)
 	try_ota_update(fa);
@@ -144,11 +146,15 @@ static int loader(const struct shell *sh) {
 	uintptr_t base_addr = DT_PARTITION_ADDR(DT_NODELABEL(user_sketch));
 
 	char header[SKETCH_HEADER_LEN];
+#if defined(CONFIG_FLASH_MAP)
 	rc = flash_area_read(fa, 0, header, sizeof(header));
 	if (rc) {
 		printk("Failed to read header, rc %d\n", rc);
 		return rc;
 	}
+#else
+	memcpy(header, (const void *)base_addr, sizeof(header));
+#endif
 
 	bool sketch_valid = true;
 	struct sketch_header_v1 *sketch_hdr = (struct sketch_header_v1 *)(header + 7);
