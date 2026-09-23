@@ -123,93 +123,7 @@ nano33ble.debug.cortex-debug.custom.request=attach
 
 ##############################################################################################################
 
-ek_ra8d1.name=Renesas RA8D1 EK
-ek_ra8d1.build.core=arduino
-ek_ra8d1.build.crossprefix=arm-zephyr-eabi-
-ek_ra8d1.build.compiler_path={runtime.tools.arm-zephyr-eabi-1.0.1.path}/bin/
-
-ek_ra8d1.menu.debug.false=Standard
-ek_ra8d1.menu.debug.true=Debug
-ek_ra8d1.menu.debug.true.build.zsk_args.debug=-debug
-
-ek_ra8d1.menu.link_mode.dynamic=Dynamic
-ek_ra8d1.menu.link_mode.static=Static
-ek_ra8d1.menu.link_mode.static.build.link_mode=static
-ek_ra8d1.menu.link_mode.static.upload.extension=bin-zsk.bin
-
-ek_ra8d1.build.zephyr_target=ek_ra8d1
-ek_ra8d1.build.zephyr_args=
-ek_ra8d1.build.zephyr_hals=hal_renesas
-ek_ra8d1.build.zephyr_toolchain=arm-zephyr-eabi
-ek_ra8d1.build.variant=ek_ra8d1_r7fa8d1bhecbd
-
-ek_ra8d1.build.extra_flags=
-ek_ra8d1.build.postbuild.cmd="{tools.imgtool.path}/{tools.imgtool.cmd}" exit
-ek_ra8d1.build.board=EK_RA8D1
-
-#ek_ra8d1.recipe.hooks.objcopy.postobjcopy.4.pattern=cp {build.variant.path}/flasher.jlink "{build.path}/flasher.jlink"
-#ek_ra8d1.recipe.hooks.objcopy.postobjcopy.5.pattern=sed -i 's|SKETCH|"{build.path}/{build.project_name}.llext.dfu.bin"|g' "{build.path}/flasher.jlink"
-
-ek_ra8d1.upload_port.0.vid=0x045b
-ek_ra8d1.upload_port.0.pid=0x0261
-
-ek_ra8d1.upload.tool=pyocd
-ek_ra8d1.upload.tool.default=pyocd
-ek_ra8d1.upload.protocol=
-ek_ra8d1.upload.transport=
-ek_ra8d1.upload.use_1200bps_touch=false
-ek_ra8d1.upload.wait_for_upload_port=false
-ek_ra8d1.upload.native_usb=true
-ek_ra8d1.upload.target=R7FA8D1AH
-
-ek_ra8d1.bootloader.tool=pyocd
-ek_ra8d1.bootloader.tool.default=pyocd
-ek_ra8d1.bootloader.file=zephyr-{build.variant}.elf
-ek_ra8d1.bootloader.target=R7FA8D1AH
-
-
 ##############################################################################################################
-
-frdm_mcxn947.name=NXP FRDM MCXN947
-frdm_mcxn947.build.core=arduino
-frdm_mcxn947.build.crossprefix=arm-zephyr-eabi-
-frdm_mcxn947.build.compiler_path={runtime.tools.arm-zephyr-eabi-1.0.1.path}/bin/
-
-frdm_mcxn947.menu.debug.false=Standard
-frdm_mcxn947.menu.debug.true=Debug
-frdm_mcxn947.menu.debug.true.build.zsk_args.debug=-debug
-
-frdm_mcxn947.menu.link_mode.dynamic=Dynamic
-frdm_mcxn947.menu.link_mode.static=Static
-frdm_mcxn947.menu.link_mode.static.build.link_mode=static
-frdm_mcxn947.menu.link_mode.static.upload.extension=bin-zsk.bin
-
-frdm_mcxn947.build.zephyr_target=frdm_mcxn947//cpu0
-frdm_mcxn947.build.zephyr_args=
-frdm_mcxn947.build.zephyr_hals=hal_nxp
-frdm_mcxn947.build.zephyr_toolchain=arm-zephyr-eabi
-frdm_mcxn947.build.variant=frdm_mcxn947_mcxn947_cpu0
-
-frdm_mcxn947.build.extra_flags=
-frdm_mcxn947.build.postbuild.cmd="{tools.imgtool.path}/{tools.imgtool.cmd}" exit
-frdm_mcxn947.build.board=FRDM_MCXN947
-frdm_mcxn947.upload_port.0.vid=0x1fc9
-frdm_mcxn947.upload_port.0.pid=0x0143
-frdm_mcxn947.upload.target=mcxn947vdf
-
-frdm_mcxn947.upload.tool=pyocd
-frdm_mcxn947.upload.tool.default=pyocd
-frdm_mcxn947.upload.protocol=
-frdm_mcxn947.upload.transport=
-frdm_mcxn947.upload.use_1200bps_touch=false
-frdm_mcxn947.upload.wait_for_upload_port=false
-frdm_mcxn947.upload.native_usb=true
-
-frdm_mcxn947.bootloader.tool=pyocd
-frdm_mcxn947.bootloader.tool.default=pyocd
-frdm_mcxn947.bootloader.file=zephyr-{build.variant}.elf
-frdm_mcxn947.bootloader.target=mcxn947vdf
-
 
 ##########################################################################################
 
@@ -317,46 +231,6 @@ nicla_vision.debug.svd_file={runtime.platform.path}/svd/STM32H747_CM7.svd
 
 ##############################################################################################################
 
-frdm_rw612.name=NXP FRDM RW612
-frdm_rw612.build.core=arduino
-frdm_rw612.build.crossprefix=arm-zephyr-eabi-
-frdm_rw612.build.compiler_path={runtime.tools.arm-zephyr-eabi-1.0.1.path}/bin/
-
-frdm_rw612.menu.debug.false=Standard
-frdm_rw612.menu.debug.true=Debug
-frdm_rw612.menu.debug.true.build.zsk_args.debug=-debug
-
-frdm_rw612.menu.link_mode.dynamic=Dynamic
-frdm_rw612.menu.link_mode.static=Static
-frdm_rw612.menu.link_mode.static.build.link_mode=static
-frdm_rw612.menu.link_mode.static.upload.extension=bin-zsk.bin
-
-frdm_rw612.build.zephyr_target=frdm_rw612
-frdm_rw612.build.zephyr_args=
-frdm_rw612.build.zephyr_hals=hal_stm32
-frdm_rw612.build.zephyr_toolchain=arm-zephyr-eabi
-frdm_rw612.build.variant=frdm_rw612_rw612
-
-frdm_rw612.build.extra_flags=
-frdm_rw612.build.postbuild.cmd="{tools.imgtool.path}/{tools.imgtool.cmd}" exit
-frdm_rw612.build.board=FRDM_RW612
-frdm_rw612.upload_port.0.vid=0x1fc9
-frdm_rw612.upload_port.0.pid=0x0143
-frdm_rw612.upload.target=rw612
-
-frdm_rw612.upload.tool=pyocd
-frdm_rw612.upload.tool.default=pyocd
-frdm_rw612.upload.protocol=
-frdm_rw612.upload.transport=
-frdm_rw612.upload.use_1200bps_touch=false
-frdm_rw612.upload.wait_for_upload_port=false
-frdm_rw612.upload.native_usb=true
-
-frdm_rw612.bootloader.tool=pyocd
-frdm_rw612.bootloader.tool.default=pyocd
-frdm_rw612.bootloader.file=zephyr-{build.variant}.elf
-frdm_rw612.bootloader.target=rw612
-
 ##########################################################################################
 
 nicla_sense.name=Arduino Nicla Sense ME
@@ -403,7 +277,6 @@ nicla_sense.debug.server.openocd.scripts.0=interface/{programmer.protocol}.cfg
 nicla_sense.debug.server.openocd.scripts.1={programmer.transport_script}
 nicla_sense.debug.server.openocd.scripts.2=target/nrf52.cfg
 nicla_sense.debug.cortex-debug.custom.request=attach
-
 
 ##########################################################################################
 
@@ -566,51 +439,48 @@ nano_matter.debug.cortex-debug.custom.request=attach
 
 ##############################################################################################################
 
-unoq.name=Arduino UNO Q
-unoq.build.core=arduino
-unoq.build.crossprefix=arm-zephyr-eabi-
-unoq.build.compiler_path={runtime.tools.arm-zephyr-eabi-1.0.1.path}/bin/
+kit_psc3m5_evk.name=Infineon KIT_PSC3M5 EVK
+kit_psc3m5_evk.build.core=arduino
+kit_psc3m5_evk.build.crossprefix=arm-zephyr-eabi-
+kit_psc3m5_evk.build.compiler_path={runtime.tools.arm-zephyr-eabi-1.0.1.path}/bin/
 
-unoq.menu.link_mode.dynamic=Dynamic
-unoq.menu.link_mode.static=Static
-unoq.menu.link_mode.static.build.link_mode=static
-unoq.menu.link_mode.static.upload.extension=bin-zsk.bin
+kit_psc3m5_evk.build.zephyr_target=kit_psc3m5_evk
+kit_psc3m5_evk.build.zephyr_args=
+kit_psc3m5_evk.build.zephyr_hals=hal_infineon
+kit_psc3m5_evk.build.zephyr_toolchain=arm-zephyr-eabi
+kit_psc3m5_evk.build.variant=kit_psc3m5_evk_psc3m5fds2afq1
+kit_psc3m5_evk.build.artifact=zephyr_main
 
-unoq.menu.wait_linux_boot.yes=Wait for Linux
-unoq.menu.wait_linux_boot.no=Immediate
-unoq.menu.wait_linux_boot.no.build.boot_mode=immediate
-unoq.menu.wait_linux_boot.app=Wait for App
-unoq.menu.wait_linux_boot.app.build.boot_mode=app
+kit_psc3m5_evk.build.extra_flags=
+kit_psc3m5_evk.build.postbuild.cmd="{tools.imgtool.path}/{tools.imgtool.cmd}" exit
+kit_psc3m5_evk.build.board=KIT_PSC3M5_EVK
 
-unoq.build.zephyr_target=arduino_uno_q
-unoq.build.zephyr_args=
-unoq.build.zephyr_hals=hal_stm32
-unoq.build.zephyr_toolchain=arm-zephyr-eabi
-unoq.build.variant=arduino_uno_q_stm32u585xx
-unoq.build.artifact=zephyr_unoq
-unoq.build.subarch=zephyr
+kit_psc3m5_evk.menu.debug.false=Standard
+kit_psc3m5_evk.menu.debug.true=Debug
+kit_psc3m5_evk.menu.debug.true.build.zsk_args.debug=-debug
 
-unoq.openocd_cfg=flash_sketch.cfg
-unoq.build.extra_flags=
-unoq.build.postbuild.cmd="{tools.imgtool.path}/{tools.imgtool.cmd}" exit
-unoq.build.board=UNO_Q
-unoq.upload_port.0.vid=0x2341
-unoq.upload_port.0.pid=0x0078
-unoq.upload.target=stm32u585zitxq
+kit_psc3m5_evk.menu.link_mode.dynamic=Dynamic
+kit_psc3m5_evk.menu.link_mode.static=Static
+kit_psc3m5_evk.menu.link_mode.static.build.link_mode=static
+kit_psc3m5_evk.menu.link_mode.static.upload.extension=bin-zsk.bin
 
-unoq.upload.tool=remoteocd
-unoq.upload.tool.default=remoteocd
-unoq.upload.tool.network=remoteocd_network
-unoq.upload.protocol=
-unoq.upload.transport=
-unoq.upload.use_1200bps_touch=false
-unoq.upload.wait_for_upload_port=false
-unoq.upload.native_usb=true
+kit_psc3m5_evk.openocd_cfg=flash_sketch.cfg
 
-unoq.bootloader.tool=remoteocd
-unoq.bootloader.tool.default=remoteocd
-unoq.bootloader.file=zephyr-{build.variant}.elf
-unoq.bootloader.target=stm32u585zitxq
+kit_psc3m5_evk.upload.tool=openocd
+kit_psc3m5_evk.upload.tool.default=openocd
+kit_psc3m5_evk.upload.protocol=
+kit_psc3m5_evk.upload.config=-f target/infineon/psc3.cfg
+kit_psc3m5_evk.upload.programmer=-f interface/cmsis-dap.cfg
+kit_psc3m5_evk.upload.use_1200bps_touch=false
+kit_psc3m5_evk.upload.wait_for_upload_port=false
+kit_psc3m5_evk.upload.native_usb=false
+
+kit_psc3m5_evk.bootloader.tool=openocd
+kit_psc3m5_evk.bootloader.tool.default=openocd
+kit_psc3m5_evk.bootloader.file=../firmwares/zephyr-{build.variant}.hex
+kit_psc3m5_evk.bootloader.target=psc3.cm33
+
+##############################################################################################################
 
 ##############################################################################################################
 
@@ -666,64 +536,15 @@ nano_connect.debug.svd_file={runtime.platform.path}/svd/rp2040.svd
 
 ##############################################################################################################
 
-ventunoq.name=Arduino Ventuno Q
-ventunoq.build.core=arduino
-ventunoq.build.crossprefix=arm-zephyr-eabi-
-ventunoq.build.compiler_path={runtime.tools.arm-zephyr-eabi-1.0.1.path}/bin/
+#########################################################################################
+#
+# AUTO GENERATED FILE - DO NOT EDIT
+# This file is manipulated by extra/build.sh; manual changes may be overwritten.
+#
+#########################################################################################
 
-ventunoq.menu.link_mode.dynamic=Dynamic
-ventunoq.menu.link_mode.static=Static
-ventunoq.menu.link_mode.static.build.link_mode=static
-ventunoq.menu.link_mode.static.upload.extension=bin-zsk.bin
-
-ventunoq.menu.wait_linux_boot.yes=Wait for Linux
-ventunoq.menu.wait_linux_boot.no=Immediate
-ventunoq.menu.wait_linux_boot.no.build.boot_mode=immediate
-ventunoq.menu.wait_linux_boot.app=Wait for App
-ventunoq.menu.wait_linux_boot.app.build.boot_mode=app
-ventunoq.openocd_cfg=flash_sketch.cfg
-
-ventunoq.build.zephyr_target=arduino_ventuno_q
-ventunoq.build.zephyr_args=
-ventunoq.build.variant=arduino_ventuno_q_stm32h5f5xx
-ventunoq.build.artifact=zephyr_unoq
-ventunoq.build.subarch=zephyr
-ventunoq.build.mcu=cortex-m33
-ventunoq.build.fpu=-mfpu=fpv5-sp-d16
-ventunoq.build.architecture=cortex-m33
-ventunoq.compiler.zephyr.arch.define=
-
-ventunoq.build.float-abi=-mfloat-abi=hard
-ventunoq.build.extra_flags=
-ventunoq.build.postbuild.cmd="{tools.imgtool.path}/{tools.imgtool.cmd}" exit
-ventunoq.build.board=VENTUNO_Q
-ventunoq.build.zephyr_hals=hal_stm32
-ventunoq.build.extra_flags=
-ventunoq.compiler.zephyr=
-ventunoq.vid.0=0x2341
-ventunoq.pid.0=0x007a
-ventunoq.vid.1=0x1209
-ventunoq.pid.1=0xca01
-ventunoq.upload_port.0.vid=0x2341
-ventunoq.upload_port.0.pid=0x007a
-ventunoq.upload.address=0x80F0000
-ventunoq.upload.target=stm32h5f5xx
-
-ventunoq.upload.tool=remoteocd
-ventunoq.upload.tool.default=remoteocd
-ventunoq.upload.tool.network=remoteocd_network
-ventunoq.upload.protocol=
-ventunoq.upload.transport=
-ventunoq.upload.vid=0x2341
-ventunoq.upload.pid=0x007a
-ventunoq.upload.interface=0
-ventunoq.upload.use_1200bps_touch=false
-ventunoq.upload.wait_for_upload_port=false
-ventunoq.upload.native_usb=true
-ventunoq.upload.maximum_size=1966080
-ventunoq.upload.maximum_data_size=523624
-
-ventunoq.bootloader.tool=remoteocd
-ventunoq.bootloader.tool.default=remoteocd
-ventunoq.bootloader.file=zephyr-{build.variant}.elf
-ventunoq.bootloader.target=stm32h5f5xx
+kit_psc3m5_evk.upload.address=0x22010000
+kit_psc3m5_evk.upload.maximum_size=57344
+kit_psc3m5_evk.upload.maximum_data_size=8192
+kit_psc3m5_evk.build.architecture=cortex-m33
+kit_psc3m5_evk.build.mcu=cortex-m33

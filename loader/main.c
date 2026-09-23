@@ -139,6 +139,7 @@ struct backup_store {
 extern volatile __stm32_backup_sram_section struct backup_store backup;
 
 static int loader(const struct shell *sh) {
+#if defined(CONFIG_FLASH_MAP)
 	const struct flash_area *fa;
 	int rc;
 
@@ -148,15 +149,21 @@ static int loader(const struct shell *sh) {
 		printk("Failed to open flash area, rc %d\n", rc);
 		return rc;
 	}
+#endif
 
-	uintptr_t base_addr = DT_PARTITION_ADDR(DT_NODELABEL(user_sketch));
+	uintptr_t base_addr = DT_PROP_OR(DT_PATH(zephyr_user), sketch_runtime_address,
+						DT_PARTITION_ADDR(DT_NODELABEL(user_sketch)));
 
 	char header[HEADER_LEN];
+#if defined(CONFIG_LLEXT_STORAGE_WRITABLE)
 	rc = flash_area_read(fa, 0, header, sizeof(header));
 	if (rc) {
 		printk("Failed to read header, rc %d\n", rc);
 		return rc;
 	}
+#else
+	memcpy(header, (const void *)base_addr, sizeof(header));
+#endif
 
 	bool sketch_valid = true;
 	struct sketch_header_v1 *sketch_hdr = (struct sketch_header_v1 *)(header + 7);
@@ -280,6 +287,8 @@ static int loader(const struct shell *sh) {
 #endif
 
 	size_t sketch_buf_len = sketch_hdr->len;
+	printk("Sketch header: len=%u flags=0x%02x base=0x%08lx\n", sketch_hdr->len,
+	       sketch_hdr->flags, (unsigned long)base_addr);
 
 	if (sketch_hdr->flags & SKETCH_FLAG_LINKED) {
 #ifdef CONFIG_BOARD_ARDUINO_PORTENTA_C33
@@ -344,12 +353,14 @@ static int loader(const struct shell *sh) {
 		printk("Failed to load sketch, rc %d\n", res);
 		return res;
 	}
+	printk("Sketch loaded: ext=%p\n", ext);
 
 	void (*main_fn)() = llext_find_sym(&ext->exp_tab, "main");
 	if (!main_fn) {
 		printk("Failed to find main function\n");
 		return -ENOENT;
 	}
+	printk("Sketch main: %p\n", main_fn);
 #endif
 
 #ifdef CONFIG_USERSPACE
@@ -393,6 +404,7 @@ static int loader(const struct shell *sh) {
 #endif
 
 #ifdef CONFIG_LLEXT
+	printk("Entering sketch\n");
 	llext_bootstrap(ext, main_fn, NULL);
 #endif
 

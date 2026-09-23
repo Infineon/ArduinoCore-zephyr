@@ -1,0 +1,52 @@
+/*
+ * Copyright (c) Arduino s.r.l. and/or its affiliated companies
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/*
+ * Minimal Arduino overlay for the Infineon KIT_PSC3M5_EVK.
+ *
+ * This board defines real GPIOs and the UART node in the upstream Zephyr DTS:
+ * - user LED aliases: user_led0 -> GPIO port 8 pin 5, user_led1 -> GPIO port 8 pin 4
+ * - user buttons: SW_1 -> GPIO port 5 pin 0, SW_2 -> GPIO port 2 pin 0
+ * - serial console: uart3 -> scb3 on pins P6_3/P6_2
+ *
+ * The upstream board DTS does not define an Arduino Uno R3 header or a PWM/ADC
+ * alias table, so this file maps the board-defined GPIOs directly instead of
+ * inventing a non-existent Arduino header pin map.
+ */
+
+&flash0 {
+	partitions {
+		compatible = "fixed-partitions";
+		#address-cells = <1>;
+		#size-cells = <1>;
+
+		user_sketch: partition@10010000 {
+			label = "user_sketch";
+			reg = <0x10010000 DT_SIZE_K(56)>;
+		};
+	};
+};
+
+/ {
+	zephyr,user {
+		/* Execute the sketch through the address used by the Arduino uploader. */
+		sketch-runtime-address = <0x22010000>;
+
+		digital-pin-gpios = <&gpio_prt5 0 0>,   /* D0 / SW_1 */
+					<&gpio_prt2 0 0>,   /* D1 / SW_2 */
+					<&gpio_prt8 5 0>,   /* D2 / LED_0 */
+					<&gpio_prt8 4 0>;   /* D3 / LED_1 */
+
+		builtin-led-gpios = <&gpio_prt8 5 GPIO_ACTIVE_LOW>,
+					<&gpio_prt8 4 GPIO_ACTIVE_LOW>;
+
+		serials = <&uart3>;
+	};
+};
+
+&uart3 {
+	status = "okay";
+};

@@ -3,8 +3,8 @@
 # For more info:
 # https://github.com/arduino/Arduino/wiki/Arduino-IDE-1.5---3rd-party-Hardware-specification
 
-name=Arduino Zephyr Boards
-version=9.9.9
+name=Arduino Zephyr Boards (0.99.0-beta.wip.260922t1033z+g0b178b3a-dirty)
+version=0.99.0-beta.wip.260922t1033z+g0b178b3a-dirty
 
 # Compile variables
 # ------------------------
@@ -220,21 +220,22 @@ tools.patterns.flash-loader-only={loader.cmd}{loader.args.without_sketch}
 
 # Special handling of loader and sketch via cfg file
 
+# tools.openocd.path=C:/Users/jaumann/Downloads/openocd-5.19.0.4782-windows/openocd
 tools.openocd.path={runtime.tools.openocd-0.12.0-arduino1-static.path}
 tools.openocd.cmd=bin/openocd
 tools.openocd.cmd.windows=bin/openocd.exe
 
 tools.openocd.upload.params.verbose=-d2
 tools.openocd.upload.params.quiet=-d0
-tools.openocd.upload.pattern="{path}/{cmd}" -s "{path}/share/openocd/scripts/" {upload.programmer} {upload.config} -c "set filename0 "{upload.artifacts.loader}"" -c "set filename1 "{upload.artifacts.sketch}"" -c "set offset {upload.address}" -f "{build.variant.path}/{openocd_cfg}" "{upload.verbose}"
+tools.openocd.upload.pattern="{path}/{cmd}" -s "{path}/share/openocd/scripts/" {upload.programmer} {upload.config} -c "set filename0 {{upload.artifacts.loader}}" -c "set filename1 {{upload.artifacts.sketch}}" -c "set offset {upload.address}" -f "{build.variant.path}/{openocd_cfg}" "{upload.verbose}"
 
 tools.openocd.program.params.verbose=-d2
 tools.openocd.program.params.quiet=-d0
-tools.openocd.program.pattern="{path}/{cmd}" -s "{path}/share/openocd/scripts/" {upload.programmer} {upload.config} -c "set filename0 "{upload.artifacts.loader}"" -c "set filename1 "{upload.artifacts.sketch}"" -c "set offset {upload.address}" -f "{build.variant.path}/{openocd_cfg}" "{upload.verbose}"
+tools.openocd.program.pattern="{path}/{cmd}" -s "{path}/share/openocd/scripts/" {upload.programmer} {upload.config} -c "set filename0 {{upload.artifacts.loader}}" -c "set filename1 {{upload.artifacts.sketch}}" -c "set offset {upload.address}" -f "{build.variant.path}/{openocd_cfg}" "{upload.verbose}"
 
 tools.openocd.bootloader.params.verbose=-d2
 tools.openocd.bootloader.params.quiet=-d0
-tools.openocd.bootloader.pattern="{path}/{cmd}" -s "{path}/share/openocd/scripts/" {upload.programmer} {upload.config} -c "set filename0 "{upload.artifacts.loader}"" -f "{build.variant.path}/flash_bootloader.cfg" "{upload.verbose}"
+tools.openocd.bootloader.pattern="{path}/{cmd}" -s "{path}/share/openocd/scripts/" {upload.programmer} {upload.config} -c "set filename0 {{upload.artifacts.loader}}" -f "{build.variant.path}/flash_bootloader.cfg" "{upload.verbose}"
 
 
 #
