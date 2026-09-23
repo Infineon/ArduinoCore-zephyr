@@ -26,7 +26,11 @@ with open(path) as f:
     content = f.read()
 
 if old not in content:
-    sys.exit(f"ERROR: expected marker not found in {path}; file content may have changed")
+    print(f"MARKER NOT FOUND in {path}; dumping full actual content below:", file=sys.stderr)
+    print("--- BEGIN ACTUAL FILE ---", file=sys.stderr)
+    print(content, file=sys.stderr)
+    print("--- END ACTUAL FILE ---", file=sys.stderr)
+    sys.exit(1)
 
 with open(path, "w") as f:
     f.write(content.replace(old, new))
