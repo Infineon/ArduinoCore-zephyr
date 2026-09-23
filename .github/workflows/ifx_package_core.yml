@@ -215,6 +215,15 @@ jobs:
           key: ${{ github.job }}-${{ matrix.board }} # independent caches
           path: ~/.cache/ccache
 
+      - name: DEBUG - probe imgtool pip install
+        if: ${{ matrix.board == 'kit_pse84_ai' }}
+        run: |
+          source venv/bin/activate
+          echo "python: $(which python3)"
+          curl -sI https://pypi.org | head -1 || echo "PyPI unreachable"
+          python3 -m pip install -v cryptography cbor2 click intelhex Pillow
+          echo "exit code: $?"
+
       - name: Build loader
         shell: bash
         run: |
