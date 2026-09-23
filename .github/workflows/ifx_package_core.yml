@@ -215,14 +215,13 @@ jobs:
           key: ${{ github.job }}-${{ matrix.board }} # independent caches
           path: ~/.cache/ccache
 
-      - name: DEBUG - probe imgtool pip install
+      - name: DEBUG - instrument pse84_metadata.cmake pip install
         if: ${{ matrix.board == 'kit_pse84_ai' }}
         run: |
-          source venv/bin/activate
-          echo "python: $(which python3)"
-          curl -sI https://pypi.org | head -1 || echo "PyPI unreachable"
-          python3 -m pip install -v cryptography cbor2 click intelhex Pillow
-          echo "exit code: $?"
+          F="$GITHUB_WORKSPACE/../zephyr/soc/infineon/edge/pse84/pse84_metadata.cmake"
+          python3 extra/debug_patch_pse84_metadata.py "$F"
+          echo "--- patched file ---"
+          cat "$F"
 
       - name: Build loader
         shell: bash
