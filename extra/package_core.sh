@@ -26,7 +26,7 @@ source "$(dirname "${BASH_SOURCE[0]}")/common.sh"
 
 # we use variants for include because we filter on file paths
 # and boards for exclude because we want to remove matching lines in boards.txt
-BOARD_DETAILS=$(extra/get_board_details.sh)
+BOARD_DETAILS=${ALL_BOARD_DATA:-$(extra/get_board_details.sh)}
 if [ $ARTIFACT == "zephyr" ] ; then
 	# all boards, except the CI/dev only native_sim artifact
 	INCLUDED_VARIANTS=$(echo ${BOARD_DETAILS} | jq -cr "map(select(.artifact != \"native_sim\")) | .[].variant")
