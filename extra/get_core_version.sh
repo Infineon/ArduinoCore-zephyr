@@ -126,6 +126,13 @@ else
 			v_patch="${BASH_REMATCH[3]}"
 			v_extra="${BASH_REMATCH[4]}" # optional, lead -
 			count="${BASH_REMATCH[5]}"
+		elif [ -z "$version_from_git" ]; then
+			# no matching tag reachable at all (eg. a fresh branch history)
+			v_maj=9
+			v_min=9
+			v_patch=9
+			v_extra="-0"
+			count=0
 		else
 			echo "Error: unexpected git version '$version_from_git', fetch tags" >&2
 			exit 1
