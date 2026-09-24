@@ -18,6 +18,8 @@
  *   Button: P7_0 (SW1, active-low, internal pull-up)
  */
 
+#include <zephyr/dt-bindings/adc/adc.h>
+
 /* ------------------------------------------------------------------ */
 /* Arduino user sketch partition                                      */
 /* Placed at the end of the CM33 secure XIP flash region.             */
@@ -250,6 +252,84 @@ spi1: &scb10 {
 };
 
 /* ------------------------------------------------------------------ */
+/* Analog input - AutAnalog SAR direct GPIO channels                  */
+/* ------------------------------------------------------------------ */
+&autanalog {
+	status = "okay";
+};
+
+&adc0 {
+	status = "okay";
+	#address-cells = <1>;
+	#size-cells = <0>;
+	vref-source = "vdda";
+
+	channel@0 {
+		reg = <0>;
+		zephyr,gain = "ADC_GAIN_1";
+		zephyr,reference = "ADC_REF_VDD_1";
+		zephyr,acquisition-time = <ADC_ACQ_TIME_MAX>;
+		zephyr,resolution = <12>;
+	};
+
+	channel@1 {
+		reg = <1>;
+		zephyr,gain = "ADC_GAIN_1";
+		zephyr,reference = "ADC_REF_VDD_1";
+		zephyr,acquisition-time = <ADC_ACQ_TIME_MAX>;
+		zephyr,resolution = <12>;
+	};
+
+	channel@2 {
+		reg = <2>;
+		zephyr,gain = "ADC_GAIN_1";
+		zephyr,reference = "ADC_REF_VDD_1";
+		zephyr,acquisition-time = <ADC_ACQ_TIME_MAX>;
+		zephyr,resolution = <12>;
+	};
+
+	channel@3 {
+		reg = <3>;
+		zephyr,gain = "ADC_GAIN_1";
+		zephyr,reference = "ADC_REF_VDD_1";
+		zephyr,acquisition-time = <ADC_ACQ_TIME_MAX>;
+		zephyr,resolution = <12>;
+	};
+
+	channel@4 {
+		reg = <4>;
+		zephyr,gain = "ADC_GAIN_1";
+		zephyr,reference = "ADC_REF_VDD_1";
+		zephyr,acquisition-time = <ADC_ACQ_TIME_MAX>;
+		zephyr,resolution = <12>;
+	};
+
+	channel@5 {
+		reg = <5>;
+		zephyr,gain = "ADC_GAIN_1";
+		zephyr,reference = "ADC_REF_VDD_1";
+		zephyr,acquisition-time = <ADC_ACQ_TIME_MAX>;
+		zephyr,resolution = <12>;
+	};
+
+	channel@6 {
+		reg = <6>;
+		zephyr,gain = "ADC_GAIN_1";
+		zephyr,reference = "ADC_REF_VDD_1";
+		zephyr,acquisition-time = <ADC_ACQ_TIME_MAX>;
+		zephyr,resolution = <12>;
+	};
+
+	channel@7 {
+		reg = <7>;
+		zephyr,gain = "ADC_GAIN_1";
+		zephyr,reference = "ADC_REF_VDD_1";
+		zephyr,acquisition-time = <ADC_ACQ_TIME_MAX>;
+		zephyr,resolution = <12>;
+	};
+};
+
+/* ------------------------------------------------------------------ */
 /* Arduino 'zephyr,user' node                                         */
 /*                                                                    */
 /* Digital pin numbers are assigned by order in digital-pin-gpios     */
@@ -320,6 +400,24 @@ spi1: &scb10 {
 				    <&gpio_prt10 7 GPIO_ACTIVE_HIGH>,  /* LED_0            */
 				    <&gpio_prt10 5 GPIO_ACTIVE_HIGH>,  /* LED_1            */
 				    <&gpio_prt20 6 GPIO_ACTIVE_HIGH>;  /* LED_RGB_RED      */
+
+		adc-pin-gpios = <&gpio_prt15 0 0>,  /* A0 */
+				<&gpio_prt15 1 0>,  /* A1 */
+				<&gpio_prt15 2 0>,  /* A2 */
+				<&gpio_prt15 3 0>,  /* A3 */
+				<&gpio_prt15 4 0>,  /* A4 */
+				<&gpio_prt15 5 0>,  /* A5 */
+				<&gpio_prt15 6 0>,  /* A6 */
+				<&gpio_prt15 7 0>;  /* A7 */
+
+		io-channels = <&adc0 0>,  /* A0 */
+			      <&adc0 1>,  /* A1 */
+			      <&adc0 2>,  /* A2 */
+			      <&adc0 3>,  /* A3 */
+			      <&adc0 4>,  /* A4 */
+			      <&adc0 5>,  /* A5 */
+			      <&adc0 6>,  /* A6 */
+			      <&adc0 7>;  /* A7 */
 
 		serials = <&uart2 &uart1>;
 		i2cs = <&i2c0 &i2c1>;
