@@ -19,7 +19,6 @@
  */
 
 #include <zephyr/dt-bindings/adc/adc.h>
-#include <zephyr/dt-bindings/adc/infineon-autanalog-sar.h>
 
 /* ------------------------------------------------------------------ */
 /* Arduino user sketch partition                                      */
@@ -261,8 +260,9 @@ spi1: &scb10 {
 
 &adc0 {
 	status = "okay";
-	vref-source = <IFX_AUTANALOG_SAR_VREF_VDDA>;
-	pos-buf-pwr = <IFX_AUTANALOG_SAR_BUF_PWR_MEDIUM_RAIL>;
+	#address-cells = <1>;
+	#size-cells = <0>;
+	vref-source = "vdda";
 
 	channel@0 {
 		reg = <0>;
