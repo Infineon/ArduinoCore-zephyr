@@ -36,6 +36,11 @@ namespace {
 
 #ifdef CONFIG_PWM
 
+#if DT_NODE_HAS_PROP(DT_PATH(zephyr_user), pwms) && \
+	DT_NODE_HAS_PROP(DT_PATH(zephyr_user), pwm_pin_gpios)
+
+#define ARDUINO_HAS_PWM_PINS 1
+
 const struct pwm_dt_spec arduino_pwm[] = {
 	DT_FOREACH_PROP_ELEM(DT_PATH(zephyr_user), pwms, PWM_DT_SPEC)};
 
@@ -51,6 +56,8 @@ size_t pwm_pin_index(pin_size_t pinNumber) {
 	}
 	return (size_t)-1;
 }
+
+#endif
 
 #endif // CONFIG_PWM
 
@@ -113,7 +120,7 @@ int analogWriteResolution() {
 }
 #endif
 
-#ifdef CONFIG_PWM
+#if defined(CONFIG_PWM) && defined(ARDUINO_HAS_PWM_PINS)
 
 void analogWrite(pin_size_t pinNumber, int value) {
 	const int maxInput = BIT(_analog_write_resolution) - 1U;
