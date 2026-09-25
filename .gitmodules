@@ -1,0 +1,3 @@
+[submodule "extra/arduino_core_tests"]
+	path = extra/arduino_core_tests
+	url = https://github.com/Infineon/arduino-core-tests.git
