@@ -742,3 +742,52 @@ ventunoq.bootloader.tool=remoteocd
 ventunoq.bootloader.tool.default=remoteocd
 ventunoq.bootloader.file=zephyr-{build.variant}.elf
 ventunoq.bootloader.target=stm32h5f5xx
+
+##############################################################################################################
+
+kit_psc3m5_evk.name=Infineon KIT_PSC3M5 EVK
+kit_psc3m5_evk.build.core=arduino
+kit_psc3m5_evk.build.crossprefix=arm-zephyr-eabi-
+kit_psc3m5_evk.build.compiler_path={runtime.tools.arm-zephyr-eabi-1.0.1.path}/bin/
+
+kit_psc3m5_evk.build.zephyr_target=kit_psc3m5_evk
+kit_psc3m5_evk.build.zephyr_args=
+kit_psc3m5_evk.build.zephyr_hals=hal_infineon
+kit_psc3m5_evk.build.zephyr_toolchain=arm-zephyr-eabi
+kit_psc3m5_evk.build.variant=kit_psc3m5_evk_psc3m5fds2afq1
+kit_psc3m5_evk.build.artifact=zephyr_main
+
+kit_psc3m5_evk.build.extra_flags=
+kit_psc3m5_evk.build.postbuild.cmd="{tools.imgtool.path}/{tools.imgtool.cmd}" exit
+kit_psc3m5_evk.build.board=KIT_PSC3M5_EVK
+
+kit_psc3m5_evk.menu.debug.false=Standard
+kit_psc3m5_evk.menu.debug.true=Debug
+kit_psc3m5_evk.menu.debug.true.build.zsk_args.debug=-debug
+
+kit_psc3m5_evk.menu.link_mode.dynamic=Dynamic
+kit_psc3m5_evk.menu.link_mode.static=Static
+kit_psc3m5_evk.menu.link_mode.static.build.link_mode=static
+kit_psc3m5_evk.menu.link_mode.static.upload.extension=bin-zsk.bin
+kit_psc3m5_evk.menu.link_mode.default=static
+
+kit_psc3m5_evk.openocd_cfg=flash_sketch.cfg
+
+kit_psc3m5_evk.upload.tool=openocd
+kit_psc3m5_evk.upload.tool.default=openocd
+kit_psc3m5_evk.upload.protocol=
+kit_psc3m5_evk.upload.config=-f target/infineon/psc3.cfg
+kit_psc3m5_evk.upload.programmer=-f interface/cmsis-dap.cfg
+kit_psc3m5_evk.tools.openocd.upload.pattern.windows=cmd /C cd /D "{build.path}" && "{path}/{cmd}" {upload.verbose} -s "{path}/scripts/" -s "{path}/share/openocd/scripts/" -s "{runtime.platform.path}/variants/{build.variant}/" -f interface/cmsis-dap.cfg -f target/infineon/psc3.cfg -c "set filename0 [list \runtime.platform.path}/firmwares/zephyr-{build.variant}.hex]; set filename1 [list \build.path}/{build.project_name}.{upload.extension}]; set offset {upload.address}" -f "{runtime.platform.path}/variants/{build.variant}/openocd.cfg" "{upload.verbose}"
+kit_psc3m5_evk.tools.openocd.program.pattern.windows=cmd /C cd /D "{build.path}" && "{path}/{cmd}" {program.verbose} -s "{path}/scripts/" -s "{path}/share/openocd/scripts/" -s "{runtime.platform.path}/variants/{build.variant}/" -f interface/cmsis-dap.cfg -f target/infineon/psc3.cfg -c "set filename0 [list \runtime.platform.path}/firmwares/zephyr-{build.variant}.hex]; set filename1 [list \build.path}/{build.project_name}.{upload.extension}]; set offset {upload.address}" -f "{runtime.platform.path}/variants/{build.variant}/openocd.cfg" "{program.verbose}"
+kit_psc3m5_evk.upload.use_1200bps_touch=false
+kit_psc3m5_evk.upload.wait_for_upload_port=false
+kit_psc3m5_evk.upload.native_usb=false
+kit_psc3m5_evk.tools.openocd.upload.pattern.windows=cmd /C cd /D "{build.path}" && "{path}/{cmd}" {upload.verbose} -s "{path}/scripts/" -s "{path}/share/openocd/scripts/" -s "{runtime.platform.path}/variants/{build.variant}/" -f interface/cmsis-dap.cfg -f target/infineon/psc3.cfg -c "set filename0 [file normalize {{runtime.platform.path}/firmwares/zephyr-{build.variant}.hex}]; set filename1 [file normalize {{build.path}/{build.project_name}.{upload.extension}}]; set offset {upload.address}" -f "{runtime.platform.path}/variants/{build.variant}/openocd.cfg" "{upload.verbose}"
+kit_psc3m5_evk.tools.openocd.program.pattern.windows=cmd /C cd /D "{build.path}" && "{path}/{cmd}" {program.verbose} -s "{path}/scripts/" -s "{path}/share/openocd/scripts/" -s "{runtime.platform.path}/variants/{build.variant}/" -f interface/cmsis-dap.cfg -f target/infineon/psc3.cfg -c "set filename0 [file normalize {{runtime.platform.path}/firmwares/zephyr-{build.variant}.hex}]; set filename1 [file normalize {{build.path}/{build.project_name}.{upload.extension}}]; set offset {upload.address}" -f "{runtime.platform.path}/variants/{build.variant}/openocd.cfg" "{program.verbose}"
+
+kit_psc3m5_evk.bootloader.tool=openocd
+kit_psc3m5_evk.bootloader.tool.default=openocd
+kit_psc3m5_evk.bootloader.file=../firmwares/zephyr-{build.variant}.hex
+kit_psc3m5_evk.tools.openocd.bootloader.pattern.windows=cmd /C cd /D "{runtime.platform.path}/firmwares" && "{path}/{cmd}" {bootloader.verbose} -s "{path}/scripts/" -s "{path}/share/openocd/scripts/" -s "{runtime.platform.path}/variants/{build.variant}/" -f interface/cmsis-dap.cfg -f target/infineon/psc3.cfg -c "set filename0 [list zephyr-{build.variant}.hex]" -f "{runtime.platform.path}/variants/{build.variant}/openocd.cfg" "{bootloader.verbose}"
+kit_psc3m5_evk.bootloader.target=psc3.cm33
