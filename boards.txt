@@ -756,6 +756,9 @@ kit_psc3m5_evk.build.zephyr_hals=hal_infineon
 kit_psc3m5_evk.build.zephyr_toolchain=arm-zephyr-eabi
 kit_psc3m5_evk.build.variant=kit_psc3m5_evk_psc3m5fds2afq1
 kit_psc3m5_evk.build.artifact=zephyr_main
+kit_psc3m5_evk.build.release_group=psc3
+kit_psc3m5_evk.build.feature_board=true
+kit_psc3m5_evk.build.ci_native_samples=blinky_arduino,hello_arduino,threads_arduino
 
 kit_psc3m5_evk.build.extra_flags=
 kit_psc3m5_evk.build.postbuild.cmd="{tools.imgtool.path}/{tools.imgtool.cmd}" exit
