@@ -23,25 +23,23 @@
 		#address-cells = <1>;
 		#size-cells = <1>;
 
-		user_sketch: partition@10010000 {
+		/* Offset within flash0; keep the first 128 KiB for the loader. */
+		user_sketch: partition@20000 {
 			label = "user_sketch";
-			reg = <0x10010000 DT_SIZE_K(56)>;
+			reg = <0x20000 DT_SIZE_K(56)>;
 		};
 	};
 };
 
 / {
 	zephyr,user {
-		/* Execute the sketch through the address used by the Arduino uploader. */
-		sketch-runtime-address = <0x22010000>;
-
-		digital-pin-gpios = <&gpio_prt5 0 0>,   /* D0 / SW_1 */
-					<&gpio_prt2 0 0>,   /* D1 / SW_2 */
-					<&gpio_prt8 5 0>,   /* D2 / LED_0 */
-					<&gpio_prt8 4 0>;   /* D3 / LED_1 */
+		digital-pin-gpios = <&gpio_prt5 0 0>,                 /* D0 / SW_1 */
+                    		<&gpio_prt2 0 0>,                 /* D1 / SW_2 */
+                    		<&gpio_prt8 5 GPIO_ACTIVE_LOW>,   /* D2 / LED_0 */
+                    		<&gpio_prt8 4 GPIO_ACTIVE_LOW>;   /* D3 / LED_1 */
 
 		builtin-led-gpios = <&gpio_prt8 5 GPIO_ACTIVE_LOW>,
-					<&gpio_prt8 4 GPIO_ACTIVE_LOW>;
+                    		<&gpio_prt8 4 GPIO_ACTIVE_LOW>;
 
 		serials = <&uart3>;
 		cans = <&can1>;
