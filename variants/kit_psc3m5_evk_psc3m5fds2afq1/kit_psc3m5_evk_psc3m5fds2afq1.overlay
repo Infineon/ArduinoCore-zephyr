@@ -11,10 +11,10 @@
  * - user LED aliases: user_led0 -> GPIO port 8 pin 5, user_led1 -> GPIO port 8 pin 4
  * - user buttons: SW_1 -> GPIO port 5 pin 0, SW_2 -> GPIO port 2 pin 0
  * - serial console: uart3 -> scb3 on pins P6_3/P6_2
+ * - Arduino SPI header: scb2 on P7.0/P7.1/P7.2, with P7.3 as GPIO chip select
  *
- * The upstream board DTS does not define an Arduino Uno R3 header or a PWM/ADC
- * alias table, so this file maps the board-defined GPIOs directly instead of
- * inventing a non-existent Arduino header pin map.
+ * The board has Uno R3-compatible headers, but the upstream DTS does not define
+ * Arduino pin aliases. This variant maps its selected GPIOs and SCB2 SPI route.
  */
 
 &flash0 {
@@ -33,16 +33,21 @@
 
 / {
 	zephyr,user {
-		digital-pin-gpios = <&gpio_prt5 0 0>,                 /* D0 / SW_1 */
-                    		<&gpio_prt2 0 0>,                 /* D1 / SW_2 */
-                    		<&gpio_prt8 5 GPIO_ACTIVE_LOW>,   /* D2 / LED_0 */
-                    		<&gpio_prt8 4 GPIO_ACTIVE_LOW>;   /* D3 / LED_1 */
+		digital-pin-gpios = <&gpio_prt5 0 0>,               /* D0 / SW_1 */
+				   <&gpio_prt2 0 0>,               /* D1 / SW_2 */
+				   <&gpio_prt8 5 GPIO_ACTIVE_LOW>, /* D2 / LED_0 */
+				   <&gpio_prt8 4 GPIO_ACTIVE_LOW>, /* D3 / LED_1 */
+				   <&gpio_prt7 3 0>,               /* D4 / SPI SS (J3.3) */
+				   <&gpio_prt7 0 0>,               /* D5 / SPI SCK (J3.6) */
+				   <&gpio_prt7 1 0>,               /* D6 / SPI MOSI (J3.4) */
+				   <&gpio_prt7 2 0>;               /* D7 / SPI MISO (J3.5) */
 
 		builtin-led-gpios = <&gpio_prt8 5 GPIO_ACTIVE_LOW>,
-                    		<&gpio_prt8 4 GPIO_ACTIVE_LOW>;
+				    <&gpio_prt8 4 GPIO_ACTIVE_LOW>;
 
 		serials = <&uart3>;
 		cans = <&can1>;
+		spis = <&scb2>;
 	};
 };
 
@@ -52,4 +57,37 @@
 
 &rtc0 {
 	status = "okay";
+};
+
+&gpio_prt7 {
+	status = "okay";
+};
+
+/* SPI changes its divider at runtime; keep CAN on its own divider. */
+&peri0_group4_16_5bit_1 {
+	status = "okay";
+	clock-div = <1>;
+};
+
+&scb2 {
+	compatible = "infineon,spi";
+	#address-cells = <1>;
+	#size-cells = <0>;
+	status = "okay";
+	clocks = <&peri0_group4_16_5bit_1>;
+	pinctrl-0 = <&p7_0_scb2_spi_m_clk &p7_1_scb2_spi_m_mosi
+		     &p7_2_scb2_spi_m_miso>;
+	pinctrl-names = "default";
+};
+
+&p7_0_scb2_spi_m_clk {
+	drive-push-pull;
+};
+
+&p7_1_scb2_spi_m_mosi {
+	drive-push-pull;
+};
+
+&p7_2_scb2_spi_m_miso {
+	input-enable;
 };
