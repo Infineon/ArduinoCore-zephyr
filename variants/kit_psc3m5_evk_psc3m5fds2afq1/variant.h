@@ -14,14 +14,13 @@
 /*
  * Minimal Arduino-style pin map for the Infineon KIT_PSC3M5_EVK.
  *
- * This board exposes its real GPIOs in the Zephyr DTS and we mapped the
- * Arduino-style aliases to the actual board-defined GPIOs in the overlay.
- * The mapping here is intentionally conservative and matches the board's
- * runtime GPIO layout without inventing a non-existent Uno R3 header.
+ * This board has Uno R3-compatible headers, but the upstream DTS does not
+ * define Arduino aliases. The SPI aliases map to the documented header signals
+ * on P7.0-P7.3 through the variant overlay.
  */
 
-#define PINS_COUNT          (4u)
-#define NUM_DIGITAL_PINS    (4u)
+#define PINS_COUNT          (8u)
+#define NUM_DIGITAL_PINS    (8u)
 #define NUM_ANALOG_INPUTS   (0u)
 #define NUM_ANALOG_OUTPUTS  (0u)
 
@@ -33,11 +32,26 @@
 #define PIN_D1              (1u)
 #define PIN_D2              (2u)
 #define PIN_D3              (3u)
+#define PIN_D4              (4u)
+#define PIN_D5              (5u)
+#define PIN_D6              (6u)
+#define PIN_D7              (7u)
+
+#define PIN_SPI_SS          (PIN_D4)
+#define PIN_SPI_SCK         (PIN_D5)
+#define PIN_SPI_MOSI        (PIN_D6)
+#define PIN_SPI_MISO        (PIN_D7)
+
+static const uint8_t SS   = PIN_SPI_SS;
+static const uint8_t SCK  = PIN_SPI_SCK;
+static const uint8_t MOSI = PIN_SPI_MOSI;
+static const uint8_t MISO = PIN_SPI_MISO;
+
+#define SPI_HOWMANY         (1u)
 
 /*
- * If the board gains ADC-capable GPIOs in the future, these can be mapped here
- * and exposed as A0..A7 in the same way as the rest of the ArduinoCore-zephyr
- * variants. For now the board DTS only exposes the user GPIOs/LEDs and UART.
+ * If ADC inputs are enabled for this variant, map them here and expose them as
+ * A0..A7 in the same way as the rest of the ArduinoCore-zephyr variants.
  */
 #define PIN_A0              (0u)
 #define PIN_A1              (1u)
