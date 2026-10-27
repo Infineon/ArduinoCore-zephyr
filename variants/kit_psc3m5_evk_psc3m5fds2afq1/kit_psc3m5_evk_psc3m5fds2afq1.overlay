@@ -4,8 +4,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+#include <zephyr/dt-bindings/adc/adc.h>
+#include <zephyr/dt-bindings/pwm/pwm.h>
+
 /*
- * Minimal Arduino overlay for the Infineon KIT_PSC3M5_EVK.
+ * Arduino overlay for the Infineon KIT_PSC3M5_EVK.
  *
  * This board defines real GPIOs and the UART node in the upstream Zephyr DTS:
  * - user LED aliases: user_led0 -> GPIO port 8 pin 5, user_led1 -> GPIO port 8 pin 4
@@ -14,7 +17,8 @@
  * - Arduino SPI header: scb2 on P7.0/P7.1/P7.2, with P7.3 as GPIO chip select
  *
  * The board has Uno R3-compatible headers, but the upstream DTS does not define
- * Arduino pin aliases. This variant maps its selected GPIOs and SCB2 SPI route.
+ * Arduino pin aliases. Header mappings follow the official BSP's design.modus:
+ * https://github.com/Infineon/TARGET_KIT_PSC3M5_EVK/blob/master/config/design.modus
  */
 
 &flash0 {
@@ -23,24 +27,66 @@
 		#address-cells = <1>;
 		#size-cells = <1>;
 
-		/* Offset within flash0; keep the first 128 KiB for the loader. */
-		user_sketch: partition@20000 {
+		/* Offset within flash0; keep the first 144 KiB for the loader. */
+		user_sketch: partition@24000 {
 			label = "user_sketch";
-			reg = <0x20000 DT_SIZE_K(56)>;
+			reg = <0x24000 DT_SIZE_K(40)>;
 		};
 	};
 };
 
 / {
+	/* Placeholder controller for analog-only pins, as used by other variants. */
+	gpio_invalid: gpio@deadbeef {
+		compatible = "vnd,gpio";
+		gpio-controller;
+		reg = <0xdeadbeef 0x1000>;
+		#gpio-cells = <0x2>;
+		status = "okay";
+	};
+
 	zephyr,user {
-		digital-pin-gpios = <&gpio_prt5 0 0>,               /* D0 / SW_1 */
-				   <&gpio_prt2 0 0>,               /* D1 / SW_2 */
-				   <&gpio_prt8 5 GPIO_ACTIVE_LOW>, /* D2 / LED_0 */
-				   <&gpio_prt8 4 GPIO_ACTIVE_LOW>, /* D3 / LED_1 */
-				   <&gpio_prt7 3 0>,               /* D4 / SPI SS (J3.3) */
-				   <&gpio_prt7 0 0>,               /* D5 / SPI SCK (J3.6) */
-				   <&gpio_prt7 1 0>,               /* D6 / SPI MOSI (J3.4) */
-				   <&gpio_prt7 2 0>;               /* D7 / SPI MISO (J3.5) */
+		digital-pin-gpios = <&gpio_prt3 2 0>,               /* D0 / header RX */
+				   <&gpio_prt3 3 0>,               /* D1 / header TX */
+				   <&gpio_prt6 1 0>,               /* D2 */
+				   <&gpio_prt4 0 0>,               /* D3 */
+				   <&gpio_prt6 0 0>,               /* D4 */
+				   <&gpio_prt4 1 0>,               /* D5 */
+				   <&gpio_prt4 2 0>,               /* D6 */
+				   <&gpio_prt3 0 0>,               /* D7 */
+				   <&gpio_prt7 6 0>,               /* D8 */
+				   <&gpio_prt4 3 0>,               /* D9 */
+				   <&gpio_prt7 3 0>,               /* D10 / SPI SS */
+				   <&gpio_prt7 1 0>,               /* D11 / SPI MOSI */
+				   <&gpio_prt7 2 0>,               /* D12 / SPI MISO */
+				   <&gpio_prt7 0 0>,               /* D13 / SPI SCK */
+				   <&gpio_prt9 2 0>,               /* D14 / header SDA */
+				   <&gpio_prt9 0 0>,               /* D15 / header SCL */
+				   <&gpio_prt8 5 GPIO_ACTIVE_LOW>, /* D16 / LED_0 */
+				   <&gpio_prt8 4 GPIO_ACTIVE_LOW>, /* D17 / LED_1 */
+				   <&gpio_prt5 0 GPIO_PULL_UP>,    /* D18 / SW_1 */
+				   <&gpio_prt2 0 GPIO_PULL_UP>,    /* D19 / SW_2 */
+				   <&gpio_prt6 2 0>,               /* D20 / debug UART RX */
+				   <&gpio_prt6 3 0>,               /* D21 / debug UART TX */
+				   <&gpio_invalid 0 0>,            /* A0 (analog only) */
+				   <&gpio_invalid 1 0>,            /* A1 (analog only) */
+				   <&gpio_invalid 2 0>,            /* A2 (analog only) */
+				   <&gpio_invalid 3 0>,            /* A3 (analog only) */
+				   <&gpio_invalid 4 0>,            /* A4 (analog only) */
+				   <&gpio_invalid 5 0>;            /* A5 (analog only) */
+
+		/* Dedicated ADC inputs have no GPIO controller; use the placeholder one. */
+		adc-pin-gpios = <&gpio_invalid 0 0>, <&gpio_invalid 1 0>,
+				<&gpio_invalid 2 0>, <&gpio_invalid 3 0>,
+				<&gpio_invalid 4 0>, <&gpio_invalid 5 0>;
+		io-channels = <&adc0 0>, <&adc0 1>, <&adc0 2>,
+			      <&adc0 3>, <&adc0 4>, <&adc0 5>;
+
+		/* D5/D6 share these timers; expose only independent D3/D9 outputs. */
+		pwm-pin-gpios = <&gpio_prt4 0 0>, <&gpio_prt4 3 0>;
+		/* D9 uses line_compl, so invert it for an active-high duty cycle. */
+		pwms = <&pwm1_4 0 PWM_HZ(500) PWM_POLARITY_NORMAL>,
+		       <&pwm1_5 0 PWM_HZ(500) PWM_POLARITY_INVERTED>;
 
 		builtin-led-gpios = <&gpio_prt8 5 GPIO_ACTIVE_LOW>,
 				    <&gpio_prt8 4 GPIO_ACTIVE_LOW>;
@@ -51,16 +97,124 @@
 	};
 };
 
+&slot0_partition {
+	reg = <0x12000000 DT_SIZE_K(144)>;
+};
+
 &uart3 {
 	status = "okay";
+	/* P6.0/P6.1 are D4/D2, not debug UART flow-control pins. */
+	pinctrl-0 = <&p6_3_scb3_uart_tx &p6_2_scb3_uart_rx>;
 };
 
 &rtc0 {
 	status = "okay";
 };
 
+&gpio_prt4 {
+	status = "okay";
+};
+
 &gpio_prt7 {
 	status = "okay";
+};
+
+&gpio_prt9 {
+	status = "okay";
+};
+
+&peri0_group5_16bit_0 {
+	status = "okay";
+	clock-div = <100>;
+};
+
+&tcpwm1_4 {
+	status = "okay";
+};
+
+&pwm1_4 {
+	status = "okay";
+	zephyr,deferred-init;
+	clocks = <&peri0_group5_16bit_0>;
+	pinctrl-0 = <&p4_0_pwm1_4>;
+	pinctrl-1 = <&p4_0_pwm1_4>;
+	pinctrl-names = "default", "arduino";
+};
+
+&tcpwm1_5 {
+	status = "okay";
+};
+
+&pwm1_5 {
+	status = "okay";
+	zephyr,deferred-init;
+	clocks = <&peri0_group5_16bit_0>;
+	pinctrl-0 = <&p4_3_pwm1_5>;
+	pinctrl-1 = <&p4_3_pwm1_5>;
+	pinctrl-names = "default", "arduino";
+};
+
+&p4_0_pwm1_4 {
+	drive-push-pull;
+};
+
+&p4_3_pwm1_5 {
+	drive-push-pull;
+};
+
+&adc0 {
+	status = "okay";
+	ref-internal-source;
+	#address-cells = <1>;
+	#size-cells = <0>;
+
+	channel@0 {
+		reg = <0>;
+		zephyr,gain = "ADC_GAIN_1";
+		zephyr,reference = "ADC_REF_INTERNAL";
+		zephyr,acquisition-time = <ADC_ACQ_TIME_DEFAULT>;
+		zephyr,resolution = <12>;
+	};
+
+	channel@1 {
+		reg = <1>;
+		zephyr,gain = "ADC_GAIN_1";
+		zephyr,reference = "ADC_REF_INTERNAL";
+		zephyr,acquisition-time = <ADC_ACQ_TIME_DEFAULT>;
+		zephyr,resolution = <12>;
+	};
+
+	channel@2 {
+		reg = <2>;
+		zephyr,gain = "ADC_GAIN_1";
+		zephyr,reference = "ADC_REF_INTERNAL";
+		zephyr,acquisition-time = <ADC_ACQ_TIME_DEFAULT>;
+		zephyr,resolution = <12>;
+	};
+
+	channel@3 {
+		reg = <3>;
+		zephyr,gain = "ADC_GAIN_1";
+		zephyr,reference = "ADC_REF_INTERNAL";
+		zephyr,acquisition-time = <ADC_ACQ_TIME_DEFAULT>;
+		zephyr,resolution = <12>;
+	};
+
+	channel@4 {
+		reg = <4>;
+		zephyr,gain = "ADC_GAIN_1";
+		zephyr,reference = "ADC_REF_INTERNAL";
+		zephyr,acquisition-time = <ADC_ACQ_TIME_DEFAULT>;
+		zephyr,resolution = <12>;
+	};
+
+	channel@5 {
+		reg = <5>;
+		zephyr,gain = "ADC_GAIN_1";
+		zephyr,reference = "ADC_REF_INTERNAL";
+		zephyr,acquisition-time = <ADC_ACQ_TIME_DEFAULT>;
+		zephyr,resolution = <12>;
+	};
 };
 
 /* SPI changes its divider at runtime; keep CAN on its own divider. */
