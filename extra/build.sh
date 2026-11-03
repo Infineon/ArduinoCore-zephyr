@@ -54,6 +54,8 @@ if ! [ -z "$chosen_board" ]; then
 	arg_token='(?:[^\s"'\'']+|"[^"]*"|'\''[^'\'']*'\'')+'
 	mapfile -t args < <(jq -cr '.args' <<< "$chosen_board" | grep -oP "$arg_token")
 	upload_offset=$(jq -cr '.upload_offset' <<< "$chosen_board")
+	companion_target=$(jq -cr '.companion_target' <<< "$chosen_board")
+	companion_suffix=$(jq -cr '.companion_suffix' <<< "$chosen_board")
 
 	# Check for debug flag and append
 	if [ x$2 == x"--debug" ]; then
@@ -69,6 +71,8 @@ else
 	if [ ! -z "$chosen_board" ]; then
 		board=$(jq -cr '.board' <<< "$chosen_board")
 		upload_offset=$(jq -cr '.upload_offset' <<< "$chosen_board")
+		companion_target=$(jq -cr '.companion_target' <<< "$chosen_board")
+		companion_suffix=$(jq -cr '.companion_suffix' <<< "$chosen_board")
 	else
 		log_msg warning "No board for '$target' defined in 'boards.txt'. A proper definition is required to use the core."
 	fi
@@ -96,6 +100,29 @@ BUILD_DIR=build/${variant}
 VARIANT_DIR=variants/${variant}
 rm -rf ${BUILD_DIR}
 west build -d ${BUILD_DIR} -b ${target} loader -t llext-edk "${args[@]}"
+
+# Some boards need a companion image built for a different core, e.g. one
+# that only releases a secondary core from reset (see kit_pse84_ai_m55's
+# 'build.companion_target'/'build.companion_suffix' in boards.txt for an
+# example and rationale). This is intentionally a plain, separate 'west
+# build' rather than '--sysbuild': combining '--sysbuild' with this
+# project's own '-t llext-edk' custom build target does not work, since
+# sysbuild's own CMake configure step for the main app does not receive
+# BOARD correctly in that combination.
+if [ -n "${companion_target}" ]; then
+	echo
+	echo "Build companion target: ${companion_target}"
+	COMPANION_BUILD_DIR=build/${variant}_companion
+	rm -rf ${COMPANION_BUILD_DIR}
+	west build -d ${COMPANION_BUILD_DIR} -b ${companion_target} \
+		"${ZEPHYR_BASE}/samples/basic/minimal" \
+		-- -DCONFIG_SOC_PSE84_M55_ENABLE=y
+	companion_hex=${COMPANION_BUILD_DIR}/zephyr/zephyr.signed.hex
+	if ! [ -f "${companion_hex}" ] ; then
+		companion_hex=${COMPANION_BUILD_DIR}/zephyr/zephyr.hex
+	fi
+	cp ${companion_hex} firmwares/zephyr-${variant}${companion_suffix}.hex
+fi
 
 # Extract the generated EDK tarball and copy it to the variant directory
 mkdir -p ${VARIANT_DIR} firmwares

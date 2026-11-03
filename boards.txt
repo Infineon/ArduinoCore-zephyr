@@ -859,6 +859,15 @@ kit_pse84_ai_m55.build.zephyr_target=kit_pse84_ai/pse846gps2dbzc4a/m55
 kit_pse84_ai_m55.build.zephyr_args=
 kit_pse84_ai_m55.build.zephyr_hals=hal_infineon
 kit_pse84_ai_m55.build.variant=kit_pse84_ai_pse846gps2dbzc4a_m55
+# CM55 cannot boot standalone - it needs a companion CM33 image to release
+# it (see zephyr/boards/infineon/kit_pse84_ai/doc/index.rst "Boot Flow").
+# This mirrors exactly what Zephyr's own sysbuild.cmake does for this
+# board (ExternalZephyrProject_Add of samples/basic/minimal with
+# CONFIG_SOC_PSE84_M55_ENABLE=1), but as a plain, separate 'west build'
+# rather than via --sysbuild, since --sysbuild does not compose with the
+# loader's own '-t llext-edk' custom build target.
+kit_pse84_ai_m55.build.companion_target=kit_pse84_ai/pse846gps2dbzc4a/m33
+kit_pse84_ai_m55.build.companion_suffix=_enable_cm55
 kit_pse84_ai_m55.build.release_group=pse84
 kit_pse84_ai_m55.build.feature_board=false
 kit_pse84_ai_m55.build.ci_native_samples=blinky_arduino,hello_arduino

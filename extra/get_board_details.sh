@@ -27,6 +27,8 @@ for BOARD in $(get_boards); do
 	RELEASE_GROUP=$(get_board_field $BOARD "build\\.release_group")
 	CI_NATIVE_SAMPLES=$(get_board_field $BOARD "build\\.ci_native_samples")
 	UPLOAD_OFFSET=$(get_board_field $BOARD "upload\\.offset")
+	COMPANION_TARGET=$(get_board_field $BOARD "build\\.companion_target")
+	COMPANION_SUFFIX=$(get_board_field $BOARD "build\\.companion_suffix")
 
 	ARTIFACT_JSON=extra/artifacts/$ARTIFACT.json
 	if ! [ -f "$ARTIFACT_JSON" ] ; then
@@ -57,7 +59,9 @@ for BOARD in $(get_boards); do
 	  "release_group": "$RELEASE_GROUP",
 	  "ci_native_samples": "$CI_NATIVE_SAMPLES",
 	  "subarch": "$SUBARCH",
-	  "upload_offset": "$UPLOAD_OFFSET"
+	  "upload_offset": "$UPLOAD_OFFSET",
+	  "companion_target": "$COMPANION_TARGET",
+	  "companion_suffix": "$COMPANION_SUFFIX"
 	}
 EOF
 done | jq -crs .
