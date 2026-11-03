@@ -803,3 +803,99 @@ kit_pse84_ai.tools.openocd.bootloader.pattern.windows=cmd /C cd /D "{runtime.pla
 kit_pse84_ai.bootloader.target=pse84
 
 ##############################################################################################################
+
+# EXPERIMENTAL / SPIKE - kit_pse84_ai (CM55 target)
+#
+# Not yet validated on hardware: authored/built in an environment without
+# Infineon's own OpenOCD build available, so only the build (not upload) side
+# has been confirmed. Wi-Fi is NOT wired up in this variant yet (SDHC/AIROC
+# nodes are still TODO, pending confirmed reg-on/host-wake pin mapping from
+# the real KIT-PSE84-AI schematic/BSP) - this entry only proves out CM55 as
+# an Arduino target (core bring-up: GPIO/I2C/SPI/UART1/flash-partition),
+# the prerequisite step before adding Wi-Fi.
+#
+# CM55 cannot boot standalone - the Cortex-M33 boot core must run first and
+# release it (see zephyr/boards/infineon/kit_pse84_ai/doc/index.rst "Boot
+# Flow"). The bootloader.pattern below therefore flashes TWO images in one
+# OpenOCD session:
+#   1. zephyr-kit_pse84_ai_pse846gps2dbzc4a_m55_enable_cm55.hex - a static
+#      CM33 helper that only sets CONFIG_SOC_PSE84_M55_ENABLE=1 and releases
+#      CM55; built from stock Zephyr's samples/basic/minimal via
+#      `west build -b kit_pse84_ai/pse846gps2dbzc4a/m55 --sysbuild
+#      samples/basic/blinky`, which is exactly what kit_pse84_ai's own
+#      zephyr/boards/infineon/kit_pse84_ai/sysbuild.cmake already does
+#      automatically - this is a prebuilt copy of that same helper, not a
+#      custom/invented image. It never needs rebuilding unless Zephyr's own
+#      enable_cm55 mechanism changes.
+#   2. zephyr-{build.variant}.hex - this board's own Arduino loader (CM55),
+#      built the same way as every other board via extra/build.sh.
+#
+# TODO before this can be considered production-ready:
+#   - Confirm on real hardware (LED/UART output, not just a clean build)
+#   - Verify whether the combined OpenOCD session needs an explicit
+#     `targets cat1d.cm55` (or cat1d.cm33 for the first image) switch before
+#     each `flash write_image`/`program` command - untested here. Zephyr's
+#     own `west flash` mechanism instead uses TWO separate OpenOCD process
+#     invocations (one per domain) rather than one combined session - this
+#     pattern should likely be corrected to match that before relying on it.
+#   - Confirm upload.maximum_data_size (RAM display value) against real
+#     profiling; currently carried over unscaled from the CM33 variant.
+
+kit_pse84_ai_m55.name=Infineon KIT-PSE84-AI (PSOC Edge E84, CM55, EXPERIMENTAL)
+kit_pse84_ai_m55.build.core=arduino
+kit_pse84_ai_m55.build.crossprefix=arm-zephyr-eabi-
+kit_pse84_ai_m55.build.compiler_path={runtime.tools.arm-zephyr-eabi-1.0.1.path}/bin/
+
+kit_pse84_ai_m55.menu.debug.false=Standard
+kit_pse84_ai_m55.menu.debug.true=Debug
+kit_pse84_ai_m55.menu.debug.true.build.zsk_args.debug=-debug
+
+kit_pse84_ai_m55.menu.link_mode.dynamic=Dynamic
+kit_pse84_ai_m55.menu.link_mode.static=Static
+kit_pse84_ai_m55.menu.link_mode.static.build.link_mode=static
+kit_pse84_ai_m55.menu.link_mode.static.upload.extension=bin-zsk.bin
+
+kit_pse84_ai_m55.build.zephyr_target=kit_pse84_ai/pse846gps2dbzc4a/m55
+kit_pse84_ai_m55.build.zephyr_args=
+kit_pse84_ai_m55.build.zephyr_hals=hal_infineon
+kit_pse84_ai_m55.build.variant=kit_pse84_ai_pse846gps2dbzc4a_m55
+kit_pse84_ai_m55.build.release_group=pse84
+kit_pse84_ai_m55.build.feature_board=false
+kit_pse84_ai_m55.build.ci_native_samples=blinky_arduino,hello_arduino
+kit_pse84_ai_m55.build.mcu=cortex-m55
+kit_pse84_ai_m55.build.fpu=-mfpu=fpv5-sp-d16
+kit_pse84_ai_m55.build.architecture=cortex-m55
+kit_pse84_ai_m55.build.float-abi=-mfloat-abi=hard
+kit_pse84_ai_m55.compiler.zephyr.specs=
+kit_pse84_ai_m55.build.extra_flags=
+kit_pse84_ai_m55.build.specs=
+kit_pse84_ai_m55.build.link_command="{compiler.path}{compiler.c.elf.cmd}" "-L{build.path}" "-L{build.variant.path}" {compiler.c.elf.flags} {compiler.c.elf.extra_flags} {build.extra_flags} {build.extra_ldflags} {compiler.zephyr.common_ldflags} {compiler.ldflags} {object_files} -Wl,--start-group "{build.path}/{archive_file}" {compiler.zephyr.extra_ldflags} {compiler.libraries.ldflags} -Wl,--end-group {build.link_args.{build.link_mode}}
+kit_pse84_ai_m55.build.postbuild.cmd="{tools.openocd.path}/{tools.openocd.cmd}" exit
+kit_pse84_ai_m55.build.board=KIT_PSE84_AI_M55
+kit_pse84_ai_m55.upload.address=0x60680000
+kit_pse84_ai_m55.upload.target=pse84
+kit_pse84_ai_m55.upload.tool=openocd
+kit_pse84_ai_m55.upload.tool.default=openocd
+kit_pse84_ai_m55.tools.openocd.path={runtime.tools.openocd.path}
+kit_pse84_ai_m55.tools.openocd.cmd=bin/openocd
+kit_pse84_ai_m55.tools.openocd.cmd.windows=bin/openocd.exe
+kit_pse84_ai_m55.programmer.default=cmsis-dap
+kit_pse84_ai_m55.tools.openocd.upload.pattern="{path}/{cmd}" {upload.verbose} -s "{path}/scripts/" -s "{path}/share/openocd/scripts/" -s "{runtime.platform.path}/variants/{build.variant}/" -f "{runtime.platform.path}/variants/{build.variant}/openocd.cfg" -c "telnet_port disabled; init; reset init; halt; adapter speed 10000; flash write_image erase {{build.path}/{build.project_name}.{upload.extension}} {upload.address} bin; reset run; shutdown"
+kit_pse84_ai_m55.tools.openocd.program.pattern="{path}/{cmd}" {program.verbose} -s "{path}/scripts/" -s "{path}/share/openocd/scripts/" -s "{runtime.platform.path}/variants/{build.variant}/" -f "{runtime.platform.path}/variants/{build.variant}/openocd.cfg" -c "telnet_port disabled; init; reset init; halt; adapter speed 10000; flash write_image erase {{build.path}/{build.project_name}.{upload.extension}} {upload.address} bin; reset run; shutdown"
+kit_pse84_ai_m55.tools.openocd.bootloader.pattern="{path}/{cmd}" {bootloader.verbose} -s "{path}/scripts/" -s "{path}/share/openocd/scripts/" -s "{runtime.platform.path}/variants/{build.variant}/" -f "{runtime.platform.path}/variants/{build.variant}/openocd.cfg" -c "telnet_port disabled; init; reset init; halt; adapter speed 10000; program {{runtime.platform.path}/firmwares/zephyr-{build.variant}_enable_cm55.hex}; program {{runtime.platform.path}/firmwares/zephyr-{build.variant}.hex}; reset run; shutdown"
+kit_pse84_ai_m55.tools.openocd.upload.pattern.windows=cmd /C cd /D "{build.path}" && "{path}/{cmd}" {upload.verbose} -s "{path}/scripts/" -s "{path}/share/openocd/scripts/" -s "{runtime.platform.path}/variants/{build.variant}/" -f "{runtime.platform.path}/variants/{build.variant}/openocd.cfg" -c "set sketch_file [list {build.project_name}.{upload.extension}]; telnet_port disabled; init; reset init; halt; adapter speed 10000; flash write_image erase $sketch_file {upload.address} bin; reset run; shutdown"
+kit_pse84_ai_m55.tools.openocd.program.pattern.windows=cmd /C cd /D "{build.path}" && "{path}/{cmd}" {program.verbose} -s "{path}/scripts/" -s "{path}/share/openocd/scripts/" -s "{runtime.platform.path}/variants/{build.variant}/" -f "{runtime.platform.path}/variants/{build.variant}/openocd.cfg" -c "set sketch_file [list {build.project_name}.{upload.extension}]; telnet_port disabled; init; reset init; halt; adapter speed 10000; flash write_image erase $sketch_file {upload.address} bin; reset run; shutdown"
+kit_pse84_ai_m55.upload.protocol=
+kit_pse84_ai_m55.upload.transport=
+kit_pse84_ai_m55.upload.interface=0
+kit_pse84_ai_m55.upload.use_1200bps_touch=false
+kit_pse84_ai_m55.upload.wait_for_upload_port=false
+kit_pse84_ai_m55.upload.native_usb=false
+kit_pse84_ai_m55.upload.maximum_size=1571840
+kit_pse84_ai_m55.upload.maximum_data_size=135168
+kit_pse84_ai_m55.bootloader.tool=openocd
+kit_pse84_ai_m55.bootloader.tool.default=openocd
+kit_pse84_ai_m55.tools.openocd.bootloader.pattern.windows=cmd /C cd /D "{runtime.platform.path}/firmwares" && "{path}/{cmd}" {bootloader.verbose} -s "{path}/scripts/" -s "{path}/share/openocd/scripts/" -s "{runtime.platform.path}/variants/{build.variant}/" -f "{runtime.platform.path}/variants/{build.variant}/openocd.cfg" -c "set helper_file [list zephyr-{build.variant}_enable_cm55.hex]; set bootloader_file [list zephyr-{build.variant}.hex]; telnet_port disabled; init; reset init; halt; adapter speed 10000; program $helper_file; program $bootloader_file; reset run; shutdown"
+kit_pse84_ai_m55.bootloader.target=pse84
+
+##############################################################################################################
