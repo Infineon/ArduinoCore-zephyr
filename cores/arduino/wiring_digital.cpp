@@ -29,6 +29,9 @@ void pinMode(pin_size_t pinNumber, PinMode pinMode) {
 							  GPIO_INPUT | GPIO_PULL_DOWN | GPIO_ACTIVE_HIGH);
 	} else if (pinMode == OUTPUT) { // output mode
 		gpio_pin_configure_dt(&arduino_pins[pinNumber], GPIO_OUTPUT_LOW | GPIO_ACTIVE_HIGH);
+	} else if (pinMode == OUTPUT_OPENDRAIN) {
+		gpio_pin_configure_dt(&arduino_pins[pinNumber],
+							  GPIO_OUTPUT_LOW | GPIO_OPEN_DRAIN | GPIO_ACTIVE_HIGH);
 	}
 }
 
