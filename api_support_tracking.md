@@ -168,7 +168,7 @@
 | Test | Category | Status |
 |------|----------|--------|
 | **Digital I/O** |  |  |
-| `test_digitalio_single` | Digital I/O | ⚠️ |
+| `test_digitalio_single` | Digital I/O | ✅ |
 | **Analog I/O** |  |  |
 | `test_analogio_adc` | Analog ADC | ❌ COMPILE FAIL |
 | `test_analogio_pwm` | Analog PWM | ❌ COMPILE FAIL |
