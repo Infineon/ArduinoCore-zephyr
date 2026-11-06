@@ -55,6 +55,7 @@ highlight_language = "c++"
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 html_theme = "sphinx_rtd_theme"
+html_logo = "img/ifx_logo_white_green_s.png"
 html_theme_options = {
     "style_nav_header_background": "#0A8276",
 }
