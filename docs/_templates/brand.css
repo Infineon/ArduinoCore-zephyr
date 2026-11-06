@@ -1,0 +1,10 @@
+.wy-side-nav-search,
+.wy-nav-top,
+.wy-nav-side {
+    background: #0A8276;
+}
+
+.wy-menu-vertical header,
+.wy-menu-vertical p.caption {
+    color: #fff;
+}

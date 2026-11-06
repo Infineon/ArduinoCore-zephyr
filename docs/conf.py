@@ -56,9 +56,7 @@ highlight_language = "c++"
 # a list of builtin themes.
 html_theme = "sphinx_rtd_theme"
 html_logo = "img/ifx_logo_white_green_s.png"
-html_theme_options = {
-    "style_nav_header_background": "#0A8276",
-}
+html_css_files = ["brand.css"]
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
