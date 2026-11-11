@@ -1,0 +1,19 @@
+digraph architecture {
+    bgcolor="transparent";
+    node [shape=plaintext, fontname="Helvetica,Arial,sans-serif", fontsize=13];
+
+    stack [label=<
+        <TABLE BORDER="0" CELLBORDER="1" CELLSPACING="6" CELLPADDING="12" COLOR="#0A8276">
+          <TR><TD COLSPAN="2" BGCOLOR="#E6F4F2"><FONT COLOR="#0A8276"><B>Arduino Core for Zephyr</B><BR/><FONT POINT-SIZE="10">shared Arduino API</FONT></FONT></TD></TR>
+          <TR>
+            <TD BGCOLOR="white">PSOC Edge boards<BR/><FONT POINT-SIZE="10">Arduino board variant<BR/>(pin mapping, overlay, config)</FONT></TD>
+            <TD BGCOLOR="white">PSOC Control boards<BR/><FONT POINT-SIZE="10">Arduino board variant<BR/>(pin mapping, overlay, config)</FONT></TD>
+          </TR>
+          <TR><TD COLSPAN="2" BGCOLOR="#0A8276"><FONT COLOR="white"><B>Zephyr RTOS</B><BR/><FONT POINT-SIZE="10">kernel &#183; drivers &#183; devicetree &#183; build system</FONT></FONT></TD></TR>
+          <TR>
+            <TD BGCOLOR="#F2F2F2">PSOC Edge boards<BR/><FONT POINT-SIZE="10">Board support</FONT></TD>
+            <TD BGCOLOR="#F2F2F2">PSOC Control boards<BR/><FONT POINT-SIZE="10">Board support</FONT></TD>
+          </TR>
+        </TABLE>
+    >];
+}
