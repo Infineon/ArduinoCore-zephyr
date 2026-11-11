@@ -17,7 +17,7 @@ read_the_docs_build = os.environ.get("READTHEDOCS", None) == "True"
 
 # -- Project information -----------------------------------------------------
 
-project = "Arduino Core for Zephyr"
+project = "Arduino Core for Infineon PSOC™"
 copyright = "2026 Infineon Technologies AG"
 author = "Infineon Technologies AG"
 
@@ -27,7 +27,10 @@ extensions = [
     "sphinx_tabs.tabs",
     "sphinxemoji.sphinxemoji",
     "myst_parser",
+    "sphinx.ext.graphviz",
 ]
+
+graphviz_output_format = "svg"
 
 autosectionlabel_prefix_document = True
 
@@ -55,6 +58,8 @@ highlight_language = "c++"
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 html_theme = "sphinx_rtd_theme"
+html_logo = "img/ifx_logo_white_green_s.png"
+html_css_files = ["brand.css"]
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
