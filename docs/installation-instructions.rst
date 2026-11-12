@@ -41,7 +41,7 @@ Confirm the core installed correctly:
 
    arduino-cli core list
 
-The FQBN for the Infineon KIT-PSE84-AI (PSOC Edge E84) is
+The FQBN for the Infineon KIT-PSE84-AI (PSOC™ Edge E84) is
 ``infineon:zephyr_pse84:kit_pse84_ai``.
 
 Flash the loader:
