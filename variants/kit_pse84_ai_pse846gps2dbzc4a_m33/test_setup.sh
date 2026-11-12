@@ -14,7 +14,8 @@
 # Board-specific external repos
 # kit_pse84_ai has no PWM/ADC peripheral wired up (analogRead/analogWrite
 # won't even link), so only digital/serial/tone-based standard examples
-# are added here.
+# are added here. MultiSerial is included because this board's "serials"
+# DT property lists two UARTs (uart2, uart1), giving it a real Serial1.
 get_branch_tip examples arduino/arduino-examples main \
 	examples/01.Basics/BareMinimum \
 	examples/01.Basics/DigitalReadSerial \
@@ -26,6 +27,7 @@ get_branch_tip examples arduino/arduino-examples main \
 	examples/02.Digital/toneMelody \
 	examples/02.Digital/toneMultiple \
 	examples/04.Communication/ASCIITable \
+	examples/04.Communication/MultiSerial \
 	examples/04.Communication/PhysicalPixel \
 	examples/04.Communication/SerialEvent \
 	examples/05.Control/Arrays \
