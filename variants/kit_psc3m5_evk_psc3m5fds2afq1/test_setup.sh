@@ -43,3 +43,17 @@ get_branch_tip examples arduino/arduino-examples main \
 	examples/05.Control/Arrays \
 	examples/05.Control/ForLoopIteration \
 	examples/05.Control/switchCase2
+
+# This board has a real CAN controller (CONFIG_CAN=y, "cans = <&can1>;" in
+# the overlay), but the zephyr_contrib artifact's test_setup.sh blanket-skips
+# all built-in library examples before this per-variant script runs. Since
+# all three test_setup.sh files are dot-sourced into the same ci_apply_tests.sh
+# shell, they share $ALL_TESTS, so re-adding these specific paths here is
+# scoped to this board only and does not affect any other zephyr_contrib board.
+#
+# This file is also sourced by extra/ci_fetch_tests.sh (to pre-download
+# external repos), which does NOT define search_for_sketches_in or
+# $ALL_TESTS - guard the call so it only runs under ci_apply_tests.sh.
+if [ -n "${ALL_TESTS:-}" ] && command -v search_for_sketches_in >/dev/null 2>&1; then
+	search_for_sketches_in ArduinoCore-zephyr/libraries/CAN/examples >> "$ALL_TESTS"
+fi
