@@ -1,0 +1,14 @@
+version: 1
+
+backend: arduino-cli
+
+test_dirs: 
+  - tests
+  - tests/arduino-core-tests/tests
+
+test_include_patterns:
+  - "**/*.ino"
+
+test_exclude_patterns: 
+  - "**/*.exp"
+  - "**/*.h"
