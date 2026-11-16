@@ -473,20 +473,34 @@ jobs:
           echo "[${PACKAGE_INDEX_URL}](${PACKAGE_INDEX_URL})" >> $GITHUB_STEP_SUMMARY
 
 
-  # Install the packaged cores from this run's package index and artifacts.
+  # Install the packaged cores from this run's package index and run tests
+  # directly on a self-hosted runner.
 
-  install-core:
-    name: Install packaged core
-    runs-on: ubuntu-latest
+  on-target-tests:
+    name: On-target tests
+    runs-on:
+      group: EPE_BLR
+      labels: [self-hosted, linux]
     needs:
       - package-core
       - package-index
+    strategy:
+      fail-fast: false
+      matrix:
+        fqbn:
+          - arduino:zephyr_contrib:kit_pse84_ai
     steps:
 
       - name: Check out repository
         uses: actions/checkout@v6
         with:
           submodules: recursive
+
+      - name: Get runner hostname
+        run: |
+          runner_hostname=$(hostname)
+          echo "RUNNER_HOSTNAME=${runner_hostname}" >> "$GITHUB_ENV"
+          echo "::notice::Runner hostname: ${runner_hostname}"
 
       - name: Download core package artifacts
         uses: actions/download-artifact@v8
@@ -594,18 +608,23 @@ jobs:
       - name: Display installed board core
         run: arduino-cli core list
 
-      - name: Run on-target tests
+      - name: Run on-target tests for ${{ matrix.fqbn }}
         shell: bash
         env:
           TTY_COMPATIBLE: "1"
           TTY_INTERACTIVE: "0"
           TERM: xterm-256color
         run: |
-          set -o pipefail
+          set -euo pipefail
+          dev_list="tests/${RUNNER_HOSTNAME}-devs.yml"
+          if [[ ! -f "$dev_list" ]]; then
+            echo "::error::Device list not found for runner ${RUNNER_HOSTNAME}: ${dev_list}"
+            exit 1
+          fi
           ottu run \
-            --device name=arduino:zephyr_contrib:kit_pse84_ai \
+            --device name=${{ matrix.fqbn }} \
             --plan tests/plan.yml \
-            --dev-list tests/epelabpc-devs.yml \
+            --dev-list "$dev_list" \
             2>&1 | sed -u 's/\x1b\[?25[lh]//g'
 
 
