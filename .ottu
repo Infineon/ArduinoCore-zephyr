@@ -4,7 +4,7 @@ backend: arduino-cli
 
 test_dirs: 
   - tests
-  - tests/arduino-core-tests/tests
+  - tests/arduino_core_tests/tests
 
 test_include_patterns:
   - "**/*.ino"
