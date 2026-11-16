@@ -413,6 +413,16 @@ jobs:
       - name: Prepare package index
         run: |
           wget "${PACKAGE_INDEX_SOURCE}" -O ci_index.json
+          wget https://downloads.arduino.cc/packages/package_index.json -O official_index.json
+          jq -s '
+            .[0] as $index |
+            .[1] as $official |
+            $index |
+            .packages = (
+              [.packages[] | select(.name != "zephyr")] +
+              [$official.packages[] | select(.name == "zephyr")]
+            )
+          ' ci_index.json official_index.json > ci_index.tmp && mv ci_index.tmp ci_index.json
           # clear other platforms from the index
           jq '.packages[0].platforms = []' ci_index.json > ci_index.tmp && mv ci_index.tmp ci_index.json
 
