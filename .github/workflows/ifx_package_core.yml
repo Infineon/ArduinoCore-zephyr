@@ -499,6 +499,14 @@ jobs:
 
       - name: Set up Arduino CLI
         uses: arduino/setup-arduino-cli@v2
+        with:
+          version: 1.2.0
+
+      - name: Install ottu
+        run: |
+          python -m pip install --user --upgrade ottu
+          python -m pip show ottu
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
 
       - name: Install downloaded cores from the package index
         shell: bash
@@ -573,7 +581,13 @@ jobs:
             arduino-cli core install --additional-urls "$index_url" "$core"
           done
 
-          arduino-cli core list
+      - name: Install ottu-target library
+        run: |
+          arduino-cli lib update-index
+          arduino-cli lib install ottu-target
+
+      - name: Display installed board core
+        run: arduino-cli core list
 
 
 
