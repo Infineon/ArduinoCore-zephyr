@@ -14,10 +14,7 @@ name: Package, test and upload core (Infineon)
 on:
   push:
     branches:
-      - edge-main
-      - control-main
-    tags-ignore:
-      - 'tools/**' # do not run on tags created for tool releases
+      - '**'
   pull_request:
     branches:
       - edge-main
@@ -379,21 +376,20 @@ jobs:
 
 
 
-  # Prepare this PR's temporary package index JSON by merging the newly
-  # built core packages with the latest package index from ci-builds.
+  # Prepare a temporary package index JSON by merging the newly built core
+  # packages with the latest ci-builds index or the official Arduino index.
 
   package-index:
-    name: Package index URL for offline tests
+    name: Prepare package index
     runs-on: ubuntu-latest
     needs:
       - build-env
       - package-core
-    if: ${{ github.event_name == 'pull_request' && needs.build-env.outputs.CI_BUILDS_URL != '' }}
     env:
       CORE_HASH: ${{ needs.build-env.outputs.CORE_HASH }}
       CORE_BRANCH: ${{ needs.build-env.outputs.CORE_BRANCH }}
       ARTIFACTS: ${{ needs.build-env.outputs.ARTIFACTS }}
-      CI_BUILDS_URL: ${{ needs.build-env.outputs.CI_BUILDS_URL }}
+      PACKAGE_INDEX_SOURCE: ${{ needs.build-env.outputs.CI_BUILDS_URL || 'https://downloads.arduino.cc/packages/package_index.json' }}
     steps:
 
       - uses: actions/checkout@v6
@@ -414,9 +410,9 @@ jobs:
           path: .
           merge-multiple: true
 
-      - name: Prepare PR package index
+      - name: Prepare package index
         run: |
-          wget ${CI_BUILDS_URL} -O ci_index.json
+          wget "${PACKAGE_INDEX_SOURCE}" -O ci_index.json
           # clear other platforms from the index
           jq '.packages[0].platforms = []' ci_index.json > ci_index.tmp && mv ci_index.tmp ci_index.json
 
@@ -434,11 +430,15 @@ jobs:
             jq -s '.[0].packages[0].platforms += .[1].packages[0].platforms | .[0]' \
                     ci_index.json ${PACKAGE_JSON} > ci_index.tmp && mv ci_index.tmp ci_index.json
           done
-          PACKAGE_INDEX_FILE="package_arduino_zephyr_pr_${{ github.event.pull_request.number }}_ci_index.json"
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            PACKAGE_INDEX_FILE="package_arduino_zephyr_pr_${{ github.event.pull_request.number }}_ci_index.json"
+          else
+            PACKAGE_INDEX_FILE="package_arduino_zephyr_run_${GITHUB_RUN_ID}_ci_index.json"
+          fi
           echo "PACKAGE_INDEX_FILE=${PACKAGE_INDEX_FILE}" >> $GITHUB_ENV
           mv ci_index.json ${PACKAGE_INDEX_FILE}
 
-      - name: Archive PR package index
+      - name: Archive package index
         id: package-index-json
         uses: actions/upload-artifact@v7
         with:
