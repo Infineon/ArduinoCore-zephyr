@@ -1,0 +1,12 @@
+version: 1
+
+suites:
+
+  - name: pin-interrupts
+    tests:
+      - digitalio
+      - interrupts
+    requires:
+      device:
+        - features:
+            - digitalio
