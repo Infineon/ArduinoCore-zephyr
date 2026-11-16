@@ -419,12 +419,21 @@ jobs:
             .[1] as $official |
             $index |
             .packages = (
-              [.packages[] | select(.name != "zephyr")] +
-              [$official.packages[] | select(.name == "zephyr")]
+              [
+                $index.packages[] as $package |
+                ([$official.packages[] | select(.name == $package.name) | .tools[]?]) as $official_tools |
+                $package + {
+                  tools: (($package.tools // []) + $official_tools | unique_by([.name, .version]))
+                }
+              ] +
+              [
+                $official.packages[] |
+                select(.name as $name | ($index.packages | map(.name) | index($name)) == null)
+              ]
             )
           ' ci_index.json official_index.json > ci_index.tmp && mv ci_index.tmp ci_index.json
-          # clear other platforms from the index
-          jq '.packages[0].platforms = []' ci_index.json > ci_index.tmp && mv ci_index.tmp ci_index.json
+          # Keep package metadata and tools, but only expose this run's platforms.
+          jq '.packages |= map(.platforms = [])' ci_index.json > ci_index.tmp && mv ci_index.tmp ci_index.json
 
           mkdir -p snippets/platforms/
           jq -cr '.[]' <<< ${ARTIFACTS} | while read -r artifact; do
@@ -462,6 +471,109 @@ jobs:
           PACKAGE_INDEX_URL="https://api.github.com/repos/${{ github.repository }}/actions/artifacts/${ARTIFACT_ID}/zip"
           PACKAGE_INDEX_URL="${PACKAGE_INDEX_URL}#${{ env.PACKAGE_INDEX_FILE }}"
           echo "[${PACKAGE_INDEX_URL}](${PACKAGE_INDEX_URL})" >> $GITHUB_STEP_SUMMARY
+
+
+  # Install the packaged cores from this run's package index and artifacts.
+
+  install-core:
+    name: Install packaged core
+    runs-on: ubuntu-latest
+    needs:
+      - package-core
+      - package-index
+    steps:
+
+      - name: Download core package artifacts
+        uses: actions/download-artifact@v8
+        with:
+          pattern: ArduinoCore-*.tar.bz2
+          path: package-data/
+          merge-multiple: true
+
+      - name: Download package index
+        uses: actions/download-artifact@v8
+        with:
+          pattern: package_arduino_zephyr_*_ci_index.json
+          path: package-data/
+          merge-multiple: true
+
+      - name: Set up Arduino CLI
+        uses: arduino/setup-arduino-cli@v2
+
+      - name: Install downloaded cores from the package index
+        shell: bash
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+
+          indexes=(package-data/package_arduino_zephyr_*_ci_index.json)
+          archives=(package-data/ArduinoCore-*.tar.bz2)
+
+          if (( ${#indexes[@]} != 1 )); then
+            echo "::error::Expected one package index; found ${#indexes[@]}"
+            exit 1
+          fi
+          if (( ${#archives[@]} == 0 )); then
+            echo "::error::No core package archives were downloaded"
+            exit 1
+          fi
+
+          index_file=package-data/package_index.json
+          cp "${indexes[0]}" "$index_file"
+
+          # Serve the downloaded archives locally so Arduino CLI does not need
+          # to authenticate against the GitHub artifact API.
+          for archive in "${archives[@]}"; do
+            filename=$(basename "$archive")
+            jq \
+              --arg filename "$filename" \
+              --arg url "http://127.0.0.1:8765/$filename" \
+              '.packages |= map(
+                .platforms |= map(
+                  if .archiveFileName == $filename then .url = $url else . end
+                )
+              )' \
+              "$index_file" > package-data/package_index.tmp
+            mv package-data/package_index.tmp "$index_file"
+          done
+
+          (
+            cd package-data
+            python3 -m http.server 8765 --bind 127.0.0.1
+          ) >/tmp/package-index-server.log 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid" 2>/dev/null || true' EXIT
+
+          index_url=http://127.0.0.1:8765/package_index.json
+          for attempt in {1..20}; do
+            if curl --fail --silent "$index_url" >/dev/null; then
+              break
+            fi
+            sleep 1
+          done
+          curl --fail --silent "$index_url" >/dev/null
+
+          arduino-cli core update-index --additional-urls "$index_url"
+
+          mapfile -t cores < <(
+            jq -r '
+              .packages[].platforms[]
+              | select(.url | startswith("http://127.0.0.1:8765/"))
+              | "arduino:\(.architecture)@\(.version)"
+            ' "$index_file"
+          )
+
+          if (( ${#cores[@]} == 0 )); then
+            echo "::error::No downloaded core archives matched package-index entries"
+            exit 1
+          fi
+
+          for core in "${cores[@]}"; do
+            echo "Installing $core"
+            arduino-cli core install --additional-urls "$index_url" "$core"
+          done
+
+          arduino-cli core list
 
 
 
