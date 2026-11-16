@@ -485,6 +485,8 @@ jobs:
 
       - name: Check out repository
         uses: actions/checkout@v6
+        with:
+          submodules: recursive
 
       - name: Download core package artifacts
         uses: actions/download-artifact@v8
