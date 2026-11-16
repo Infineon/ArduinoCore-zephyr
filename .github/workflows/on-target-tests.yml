@@ -1,7 +1,4 @@
-# Copyright (c) Arduino s.r.l. and/or its affiliated companies
-# SPDX-License-Identifier: Apache-2.0
-
-name: Install packaged core (Infineon)
+name: Test on-target cores (Infineon)
 
 on:
   workflow_run:
