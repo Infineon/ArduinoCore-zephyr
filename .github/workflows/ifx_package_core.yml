@@ -564,10 +564,11 @@ jobs:
             mv package-data/package_index.tmp "$index_file"
           done
 
+          server_log=$(mktemp "${RUNNER_TEMP}/package-index-server.XXXXXX.log")
           (
             cd package-data
             python3 -m http.server 8765 --bind 127.0.0.1
-          ) >/tmp/package-index-server.log 2>&1 &
+          ) >"$server_log" 2>&1 &
           server_pid=$!
           trap 'kill "$server_pid" 2>/dev/null || true' EXIT
 
