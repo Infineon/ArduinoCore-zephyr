@@ -630,7 +630,14 @@ jobs:
           ' "$dev_list" "${{ matrix.fqbn }}")
           export ARDUINO_OPENOCD_ADAPTER_SERIAL
           echo "Using probe serial ${ARDUINO_OPENOCD_ADAPTER_SERIAL}"
-          arduino-cli burn-bootloader --fqbn ${{ matrix.fqbn }} --port /dev/ttyACM9
+          # OpenOCD reports success even when the image lands outside every
+          # flash bank, so fail explicitly if nothing was written
+          burn_log=$(mktemp "${RUNNER_TEMP}/burn-bootloader.XXXXXX.log")
+          arduino-cli burn-bootloader --fqbn ${{ matrix.fqbn }} --port /dev/ttyACM9 2>&1 | tee "$burn_log"
+          if grep -Eq "wrote 0 bytes|no flash bank found" "$burn_log"; then
+            echo "::error::burn-bootloader did not write the loader image (wrote 0 bytes or no matching flash bank)"
+            exit 1
+          fi
           ottu run \
             --device name=${{ matrix.fqbn }} \
             --plan tests/plan.yml \
