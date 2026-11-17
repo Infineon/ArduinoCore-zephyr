@@ -622,6 +622,14 @@ jobs:
             echo "::error::Device list not found for runner ${RUNNER_HOSTNAME}: ${dev_list}"
             exit 1
           fi
+          # Several probes may be connected: pin the one listed for this board
+          ARDUINO_OPENOCD_ADAPTER_SERIAL=$(python3 -c '
+          import sys, yaml
+          devs = yaml.safe_load(open(sys.argv[1]))["devices"]
+          print(next(d["uid"] for d in devs if d["name"] == sys.argv[2]))
+          ' "$dev_list" "${{ matrix.fqbn }}")
+          export ARDUINO_OPENOCD_ADAPTER_SERIAL
+          echo "Using probe serial ${ARDUINO_OPENOCD_ADAPTER_SERIAL}"
           arduino-cli burn-bootloader --fqbn ${{ matrix.fqbn }} --port /dev/ttyACM9
           ottu run \
             --device name=${{ matrix.fqbn }} \
