@@ -118,7 +118,7 @@ edk_funcs='int32_t k_sleep\(k_timeout_t timeout\)|void k_busy_wait\(uint32_t use
 perl -0pi -e "s/__pinned_func\nstatic inline ($edk_funcs)/$edk_qual \$1/g" "$syscalls_hdr"
 perl -0pi -e "s/__syscall ($edk_funcs);/$edk_qual \$1;/g" "$kernel_hdr"
 
-for ext in elf bin hex uf2; do
+for ext in elf bin hex signed.hex uf2; do
     rm -f firmwares/zephyr-$variant.$ext
     if [ -f ${BUILD_DIR}/zephyr/zephyr.$ext ]; then
         cp ${BUILD_DIR}/zephyr/zephyr.$ext firmwares/zephyr-$variant.$ext
