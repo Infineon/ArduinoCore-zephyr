@@ -488,7 +488,7 @@ jobs:
       fail-fast: false
       matrix:
         fqbn:
-          - arduino:zephyr_contrib:kit_pse84_ai
+          - infineon:zephyr_pse84:kit_pse84_ai
     steps:
 
       - name: Check out repository
@@ -527,42 +527,56 @@ jobs:
           python -m pip show ottu
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
 
-      - name: Install downloaded cores from the package index
+      # Build the standalone PSoC Edge release package exactly as the release
+      # workflow does (same archive filter and index template), so the tested
+      # package, tool dependencies included, is the one shipped to end users.
+      - name: Install the PSoC Edge release package
         shell: bash
         run: |
           set -euo pipefail
           shopt -s nullglob
 
+          group=pse84
           indexes=(package-data/package_arduino_zephyr_*_ci_index.json)
-          archives=(package-data/ArduinoCore-*.tar.bz2)
+          archives=(package-data/ArduinoCore-zephyr_contrib-*.tar.bz2)
 
           if (( ${#indexes[@]} != 1 )); then
             echo "::error::Expected one package index; found ${#indexes[@]}"
             exit 1
           fi
-          if (( ${#archives[@]} == 0 )); then
-            echo "::error::No core package archives were downloaded"
+          if (( ${#archives[@]} != 1 )); then
+            echo "::error::Expected one zephyr_contrib archive; found ${#archives[@]}"
             exit 1
           fi
 
-          index_file=package-data/package_index.json
-          cp "${indexes[0]}" "$index_file"
+          version=$(jq -r '
+            [.packages[].platforms[] | select(.architecture == "zephyr_contrib")][0].version
+          ' "${indexes[0]}")
+          if [[ -z "$version" || "$version" == "null" ]]; then
+            echo "::error::Could not determine the core version from ${indexes[0]}"
+            exit 1
+          fi
 
-          # Serve the downloaded archives locally so Arduino CLI does not need
-          # to authenticate against the GitHub artifact API.
-          for archive in "${archives[@]}"; do
-            filename=$(basename "$archive")
-            jq \
-              --arg filename "$filename" \
-              --arg url "http://127.0.0.1:8765/$filename" \
-              '.packages |= map(
-                .platforms |= map(
-                  if .archiveFileName == $filename then .url = $url else . end
-                )
-              )' \
-              "$index_file" > package-data/package_index.tmp
-            mv package-data/package_index.tmp "$index_file"
-          done
+          tar_basename=$(basename "${archives[0]}" | sed "s/^ArduinoCore-zephyr_contrib-/ArduinoCore-zephyr_${group}-/")
+          ./extra/package_release_group.sh "$group" "${archives[0]}" "package-data/${tar_basename}"
+
+          # Serve the archive locally so Arduino CLI does not need to
+          # authenticate against the GitHub artifact API.
+          index_file="package-data/package_infineon_${group}_index.json"
+          jq \
+            --arg version "$version" \
+            --arg filename "$tar_basename" \
+            --arg url "http://127.0.0.1:8765/${tar_basename}" \
+            --arg checksum "SHA-256:$(sha256sum "package-data/${tar_basename}" | cut -d' ' -f1)" \
+            --arg size "$(stat -c %s "package-data/${tar_basename}")" \
+            '.packages[0].platforms[0] |= (
+              .version = $version
+              | .archiveFileName = $filename
+              | .url = $url
+              | .checksum = $checksum
+              | .size = $size
+            )' \
+            "package/package_infineon_${group}_index.template.json" > "$index_file"
 
           server_log=$(mktemp "${RUNNER_TEMP}/package-index-server.XXXXXX.log")
           (
@@ -572,7 +586,7 @@ jobs:
           server_pid=$!
           trap 'kill "$server_pid" 2>/dev/null || true' EXIT
 
-          index_url=http://127.0.0.1:8765/package_index.json
+          index_url="http://127.0.0.1:8765/$(basename "$index_file")"
           for attempt in {1..20}; do
             if curl --fail --silent "$index_url" >/dev/null; then
               break
@@ -583,23 +597,9 @@ jobs:
 
           arduino-cli core update-index --additional-urls "$index_url"
 
-          mapfile -t cores < <(
-            jq -r '
-              .packages[].platforms[]
-              | select(.url | startswith("http://127.0.0.1:8765/"))
-              | "arduino:\(.architecture)@\(.version)"
-            ' "$index_file"
-          )
-
-          if (( ${#cores[@]} == 0 )); then
-            echo "::error::No downloaded core archives matched package-index entries"
-            exit 1
-          fi
-
-          for core in "${cores[@]}"; do
-            echo "Installing $core"
-            arduino-cli core install --additional-urls "$index_url" "$core"
-          done
+          core="infineon:zephyr_${group}@${version}"
+          echo "Installing $core"
+          arduino-cli core install --additional-urls "$index_url" "$core"
 
       - name: Install ottu-target library
         run: |
