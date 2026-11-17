@@ -59,6 +59,9 @@ done < <(sed -n 's/^\([^.#[:space:]]*\)\.build\.variant=.*/\1/p' "$CORE_DIR/boar
 
 for variant_dir in "$CORE_DIR"/variants/*/; do
 	variant_name=$(basename "$variant_dir")
+	# Directories starting with '_' hold files shared by all variants
+	# (e.g. _ldscripts, referenced from platform.txt)
+	[[ "$variant_name" == _* ]] && continue
 	is_group_variant "$variant_name" || rm -rf "$variant_dir"
 done
 
