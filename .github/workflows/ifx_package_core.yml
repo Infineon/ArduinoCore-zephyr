@@ -622,7 +622,7 @@ jobs:
             echo "::error::Device list not found for runner ${RUNNER_HOSTNAME}: ${dev_list}"
             exit 1
           fi
-          arduino-cli burn-bootloader --fqbn "$FQBN" --port /dev/ttyACM9
+          arduino-cli burn-bootloader --fqbn ${{ matrix.fqbn }} --port /dev/ttyACM9
           ottu run \
             --device name=${{ matrix.fqbn }} \
             --plan tests/plan.yml \
