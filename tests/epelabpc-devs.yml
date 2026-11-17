@@ -2,7 +2,7 @@ version: 1
 
 devices:
 
-  - name: arduino:zephyr_contrib:kit_pse84_ai
+  - name: infineon:zephyr_pse84:kit_pse84_ai
     uid: 0F16025A012D2400
     features:
       - digitalio
