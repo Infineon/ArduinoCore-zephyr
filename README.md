@@ -23,10 +23,8 @@ Infineon support is currently being implemented for two microcontrollers familie
   branch.
 
 > [!TIP]
-> The installation instructions for the basic PSOC™ Edge enablement, version
-> `0.0.1`, are temporarily available in the
-> [`psoc-edge-main`](https://github.com/Infineon/ArduinoCore-zephyr/tree/psoc-edge-main)
-> branch.
+> See the [PSOC™ Edge installation instructions](https://github.com/Infineon/ArduinoCore-zephyr/blob/edge-main/docs/installation-instructions.rst)
+> for installing the released core.
 
 
 * [**PSOC™ Control**](https://www.infineon.com/products/microcontroller/32-bit-psoc-arm-cortex/32-bit-psoc-control-arm-cortex-m33-mcu): Development is hosted in the
