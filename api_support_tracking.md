@@ -184,10 +184,10 @@
 | **External Interrupts** |  |  |
 | `test_interrupts_single` | Interrupts | ✅ |
 | **Serial (UART)** |  |  |
-| `test_uart_tx` | UART | ⚠️ |
-| `test_uart_rx` | UART | ⚠️ |
-| `test_uart_connected2_tx` | UART | ⚠️ |
-| `test_uart_connected2_rx` | UART | ⚠️ |
+| `test_uart_tx` | UART | ✅ `not_ready` excluded on Zephyr |
+| `test_uart_rx` | UART | ✅ |
+| `test_uart_connected2_tx` | UART | ✅ |
+| `test_uart_connected2_rx` | UART | ✅ |
 | **SPI** |  |  |
 | `test_spi_connected1_loopback` | SPI | ⚠️ |
 | `test_spi_connected2_masterpingpong` | SPI | 🟢 |
