@@ -527,6 +527,21 @@ jobs:
           python -m pip show ottu
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
 
+      # TEMPORARY diagnostic: ottu's own error only keeps the last 20 lines
+      # of a failing command's output, which has been hiding the real
+      # arduino-cli error behind zephyr-sketch-tool's usage dump. Make
+      # arduino-cli compile verbosely, and keep much more of its output, so
+      # the full picture shows up in the CI log. Remove once the digitalio
+      # on-target failure is understood.
+      - name: Make ottu's arduino-cli backend verbose (diagnostic)
+        run: |
+          ottu_builtins=$(python3 -c "import ottu.backend.builtins as b; print(b.__file__)")
+          sed -i 's/arduino-cli compile -b {name}/arduino-cli compile -v -b {name}/' "$ottu_builtins"
+          grep -n "arduino-cli compile" "$ottu_builtins"
+          ottu_backend=$(python3 -c "import ottu.backend.backend as b; print(b.__file__)")
+          sed -i 's/OUTPUT_TAIL_LINES = 20/OUTPUT_TAIL_LINES = 500/' "$ottu_backend"
+          grep -n "OUTPUT_TAIL_LINES" "$ottu_backend"
+
       # Build the standalone PSoC Edge release package exactly as the release
       # workflow does (same archive filter and index template), so the tested
       # package, tool dependencies included, is the one shipped to end users.
