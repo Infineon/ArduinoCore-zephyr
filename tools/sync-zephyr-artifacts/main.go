@@ -11,13 +11,38 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
-	"runtime"
 	"path/filepath"
+	"runtime"
 	"strings"
 
 	"github.com/codeclysm/extract/v4"
 	cp "github.com/otiai10/copy"
 )
+
+// findArchive returns the body of the core package for the given git hash
+// at baseURL, trying shorter hashes (down to 7 characters) until one is
+// found. For each hash, the zstd package is tried first, then the bzip2 one
+// (published before the switch to zstd).
+func findArchive(baseURL, fullHash string) (io.ReadCloser, error) {
+	for hash := fullHash; len(hash) >= 7; hash = hash[:len(hash)-1] {
+		for _, ext := range []string{".tar.zst", ".tar.bz2"} {
+			url := fmt.Sprintf("%s/ArduinoCore-zephyr-%s%s", baseURL, hash, ext)
+			fmt.Println("Trying URL:", url)
+			resp, err := http.Get(url)
+			if err != nil {
+				return nil, fmt.Errorf("error downloading %s: %w", url, err)
+			}
+			if resp.StatusCode == http.StatusOK {
+				return resp.Body, nil
+			}
+			resp.Body.Close()
+			if resp.StatusCode != http.StatusNotFound {
+				return nil, fmt.Errorf("bad status for %s: %s", url, resp.Status)
+			}
+		}
+	}
+	return nil, fmt.Errorf("could not find a valid archive for git hash %s", fullHash)
+}
 
 func main() {
 	// Parse and check arguments
@@ -53,8 +78,8 @@ func main() {
 	}
 	pathParts := strings.Split(filepath.ToSlash(absPath), "/")
 	if len(pathParts) < 3 ||
-	   pathParts[len(pathParts)-3] != "hardware" ||
-	   !strings.HasPrefix(pathParts[len(pathParts)-1], "zephyr") {
+		pathParts[len(pathParts)-3] != "hardware" ||
+		!strings.HasPrefix(pathParts[len(pathParts)-1], "zephyr") {
 		expPath := filepath.Join("hardware", "*", "zephyr")
 		fmt.Println("Error: the core path should end with ", expPath)
 		return
@@ -107,47 +132,19 @@ func main() {
 	}
 	defer os.RemoveAll(tmpDir) // Clean up
 
-	// Compose download URL from git hash
-	var archive_stream io.Reader
-
-	hash := inputHash
-	for len(hash) >= 7 {
-		filename := fmt.Sprintf("ArduinoCore-zephyr-%s.tar.bz2", hash)
-		url := fmt.Sprintf("http://downloads.arduino.cc/cores/zephyr/%s", filename)
-		fmt.Println("Trying URL:", url)
-		// Download the zip file from the URL
-
-		// Get the data
-		resp, err := http.Get(url)
-		if err != nil {
-			fmt.Println("Error downloading", url, err)
-			return
-		}
-		defer resp.Body.Close()
-
-		// Check server response, try shorter hashes if not found
-		if resp.StatusCode == http.StatusNotFound {
-			resp.Body.Close()
-			hash = hash[:len(hash)-1]
-			continue
-		} else if resp.StatusCode != http.StatusOK {
-			fmt.Println("bad status:", resp.Status)
-			return
-		}
-
-		archive_stream = resp.Body
-		break
-	}
-
-	if archive_stream == nil {
-		fmt.Println("Could not find a valid archive for git hash", inputHash)
+	archive_stream, err := findArchive("http://downloads.arduino.cc/cores/zephyr", inputHash)
+	if err != nil {
+		fmt.Println(err)
 		return
 	}
+	defer archive_stream.Close()
 
 	fmt.Println("Downloading and extracting...")
 
 	// extract the archive just received to tmpDir/
-	err = extract.Bz2(context.Background(), archive_stream, tmpDir, nil)
+	// (the format is detected from the content: zstd, or bzip2 for the
+	// packages published before the switch to zstd)
+	err = extract.Archive(context.Background(), archive_stream, tmpDir, nil)
 
 	if err != nil {
 		fmt.Println("Error extracting archive:", err)
@@ -167,7 +164,7 @@ func main() {
 			// On Windows, the user might create a junction for the api
 			// folder; that will appear as a "regular" directory, but we
 			// should not emove the linked content but only the junction itself.
-			isJunction := runtime.GOOS == "windows"	&& info.Mode()&os.ModeIrregular != 0
+			isJunction := runtime.GOOS == "windows" && info.Mode()&os.ModeIrregular != 0
 			if info.IsDir() && !isJunction {
 				// Regular directory: remove it entirely
 				os.RemoveAll(apiPath)

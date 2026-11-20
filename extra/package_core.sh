@@ -3,7 +3,7 @@
 # Copyright (c) Arduino s.r.l. and/or its affiliated companies
 # SPDX-License-Identifier: Apache-2.0
 
-# Package the core into a distributable tar.bz2 archive.
+# Package the core into a distributable tar.zst archive.
 
 set -e
 RET=0
@@ -20,7 +20,7 @@ fi
 
 ARTIFACT=$1
 VERSION=$2
-OUTPUT_FILE=${3:-distrib/${ARTIFACT}-${VERSION}.tar.bz2}
+OUTPUT_FILE=${3:-distrib/${ARTIFACT}-${VERSION}.tar.zst}
 
 source "$(dirname "${BASH_SOURCE[0]}")/common.sh"
 
@@ -59,12 +59,6 @@ cat platform.txt > ${TEMP_PLATFORM}
 [ -z "$ARTIFACT_NAME" ] || sed -ie "s/^name=.*/name=${ARTIFACT_NAME}/" ${TEMP_PLATFORM}
 sed -i -e "s/^version=.*/version=$(extra/get_core_version.sh)/" ${TEMP_PLATFORM}
 
-declutter_file() {
-	# remove comments, whitespace at EOL, '/' dir terminators and empty lines
-	[ -f "$1" ] || return 0
-	cat "$1" | sed -e 's/\s*#.*//' -e 's/\s*$//' -e 's/\/$//' | grep -v '^\s*$'
-}
-
 # create the list of files and directories to include
 TEMP_INC=$(mktemp -p . | sed 's/\.\///')
 echo ${TEMP_BOARDS} >> ${TEMP_INC}
@@ -99,14 +93,12 @@ fi
 
 # create the list of files and directories to exclude
 TEMP_EXC=$(mktemp -p . | sed 's/\.\///')
-declutter_file extra/artifacts/_common.exc >> ${TEMP_EXC}
-declutter_file extra/artifacts/$ARTIFACT.exc >> ${TEMP_EXC}
-for f in $(ls extra/artifacts/*.only | grep -v "$ARTIFACT.only") ; do
-	declutter_file $f >> ${TEMP_EXC}
-done
+artifact_exclusions $ARTIFACT >> ${TEMP_EXC}
 
 mkdir -p $(dirname ${OUTPUT_FILE})
-tar -cjhf ${OUTPUT_FILE} -X ${TEMP_EXC} -T ${TEMP_INC} \
+# --long=27: the variants share many files, far apart in the archive; a
+# 128 MiB window is still extracted with no options by zstd and arduino-cli
+tar -I "zstd -T0 -19 --long=27" -chf ${OUTPUT_FILE} -X ${TEMP_EXC} -T ${TEMP_INC} \
 	--transform "s,${TEMP_BOARDS},boards.txt," \
 	--transform "s,${TEMP_PLATFORM},platform.txt," \
 	--transform "s,^,ArduinoCore-zephyr/,"
