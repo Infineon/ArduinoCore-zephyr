@@ -14,9 +14,8 @@
 /*
  * Arduino header pin map for the Infineon KIT_PSC3M5_EVK.
  *
- * This board has Uno R3-compatible headers, but the upstream DTS does not
- * define Arduino aliases. The SPI aliases map to the documented header signals
- * on P7.0-P7.3 through the variant overlay.
+ * The board overlay maps an additional UART to D0/D1, I2C to SDA/SCL, and SPI to
+ * the documented header signals on P7.0-P7.3.
  *
  * Hardware PWM is available on D3 and D9 at 500 Hz. D5 and D6 share those
  * timers and are not exposed as PWM outputs. No DAC outputs are configured.
@@ -77,16 +76,16 @@ static const uint8_t MISO = PIN_SPI_MISO;
 #define PIN_A4              (26u)
 #define PIN_A5              (27u)
 
-#define PIN_SERIAL_RX       (20u)
-#define PIN_SERIAL_TX       (21u)
+#define PIN_SERIAL_RX       PIN_D0
+#define PIN_SERIAL_TX       PIN_D1
 
-#define SERIAL_HOWMANY      (1u)
+#define SERIAL_HOWMANY      (2u)
 #define SERIAL1_TX          PIN_SERIAL_TX
 #define SERIAL1_RX          PIN_SERIAL_RX
 
 #define SERIAL_PORT_HARDWARE Serial1
 #define SERIAL_PORT_MONITOR Serial
 
-#define WIRE_HOWMANY        (0u)
+#define WIRE_HOWMANY        (1u)
 
 #endif /* __PINS_ARDUINO__ */

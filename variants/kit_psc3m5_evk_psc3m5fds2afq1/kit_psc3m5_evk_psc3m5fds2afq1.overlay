@@ -91,8 +91,9 @@
 		builtin-led-gpios = <&gpio_prt8 5 GPIO_ACTIVE_LOW>,
 				    <&gpio_prt8 4 GPIO_ACTIVE_LOW>;
 
-		serials = <&uart3>;
+		serials = <&uart3>, <&uart4>;
 		cans = <&can1>;
+		i2cs = <&scb0>;
 		spis = <&scb2>;
 	};
 };
@@ -107,8 +108,45 @@
 	pinctrl-0 = <&p6_3_scb3_uart_tx &p6_2_scb3_uart_rx>;
 };
 
+uart4: &scb4 {
+	compatible = "infineon,uart";
+	status = "okay";
+	current-speed = <115200>;
+	clocks = <&peri0_group4_8bit_1>;
+	pinctrl-0 = <&p3_2_scb4_uart_rx &p3_3_scb4_uart_tx>;
+	pinctrl-names = "default";
+};
+
 &rtc0 {
 	status = "okay";
+};
+
+&scb0 {
+	compatible = "infineon,i2c";
+	status = "okay";
+	#address-cells = <1>;
+	#size-cells = <0>;
+	clocks = <&peri0_group4_16_5bit_2>;
+	pinctrl-0 = <&p9_0_scb0_i2c_scl &p9_2_scb0_i2c_sda>;
+	pinctrl-names = "default";
+};
+
+&p9_0_scb0_i2c_scl {
+	drive-open-drain;
+	input-enable;
+};
+
+&p9_2_scb0_i2c_sda {
+	drive-open-drain;
+	input-enable;
+};
+
+&p3_2_scb4_uart_rx {
+	input-enable;
+};
+
+&p3_3_scb4_uart_tx {
+	drive-push-pull;
 };
 
 &gpio_prt4 {
@@ -221,6 +259,16 @@
 &peri0_group4_16_5bit_1 {
 	status = "okay";
 	clock-div = <1>;
+};
+
+&peri0_group4_16_5bit_2 {
+	status = "okay";
+	clock-div = <1>;
+};
+
+&peri0_group4_8bit_1 {
+	status = "okay";
+	clock-div = <86>;
 };
 
 &scb2 {
